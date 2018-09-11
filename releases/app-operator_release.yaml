@@ -1,0 +1,16 @@
+---
+  apiVersion: helm.integrations.flux.weave.works/v1alpha2
+  kind: FluxHelmRelease
+  metadata:
+    name: apps
+    namespace: operator
+    labels:
+      chart: apps
+  spec:
+    chartGitPath: apps
+    values:
+      replicaCount: 1
+      image:
+        repository: quay.io/krubot/app-operator
+        tag: v0.0.1
+        pullPolicy: Always

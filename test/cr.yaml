@@ -1,0 +1,6 @@
+apiVersion: "app.example.com/v1alpha1"
+kind: "App"
+metadata:
+  name: "example"
+spec:
+  image: alpine 
