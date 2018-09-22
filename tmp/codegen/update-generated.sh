@@ -6,7 +6,7 @@ set -o pipefail
 
 vendor/k8s.io/code-generator/generate-groups.sh \
 deepcopy \
-github.com/example-inc/app-operator/pkg/generated \
-github.com/example-inc/app-operator/pkg/apis \
+github.com/krubot/terraform-operator/pkg/generated \
+github.com/krubot/terraform-operator/pkg/apis \
 app:v1alpha1 \
 --go-header-file "./tmp/codegen/boilerplate.go.txt"
