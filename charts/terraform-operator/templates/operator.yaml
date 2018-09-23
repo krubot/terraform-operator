@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "apps.fullname" . }}
+  name: {{ include "terraform.fullname" . }}
   labels:
-    app: {{ include "apps.name" . }}
-    chart: {{ include "apps.chart" . }}
+    app: {{ include "terraform.name" . }}
+    chart: {{ include "terraform.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "apps.name" . }}
+      app: {{ include "terraform.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ include "apps.name" . }}
+        app: {{ include "terraform.name" . }}
         release: {{ .Release.Name }}
     spec:
       containers:

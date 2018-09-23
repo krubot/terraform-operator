@@ -22,7 +22,7 @@ rules:
   verbs:
   - "*"
 - apiGroups:
-  - apps
+  - awss3buckets
   resources:
   - deployments
   - daemonsets
