@@ -26,7 +26,7 @@ func main() {
 	sdk.ExposeMetricsPort()
 
 	resource := "terraform.io/v1alpha1"
-	kind := "Resource"
+	kind := "AwsS3Bucket"
 	namespace, err := k8sutil.GetWatchNamespace()
 	if err != nil {
 		logrus.Fatalf("failed to get watch namespace: %v", err)

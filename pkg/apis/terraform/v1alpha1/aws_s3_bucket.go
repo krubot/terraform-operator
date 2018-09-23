@@ -1,5 +1,5 @@
 
-package v1
+package v1alpha1
 
 import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

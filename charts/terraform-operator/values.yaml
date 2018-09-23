@@ -2,7 +2,7 @@
 replicaCount: 1
 
 image:
-  repository: quay.io/krubot/app-operator
+  repository: quay.io/krubot/terraform-operator
   tag: latest
   pullPolicy: Always
 
