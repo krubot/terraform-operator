@@ -1,6 +1,7 @@
 package stub
 
 import (
+	"fmt"
 	"context"
 
 	"github.com/krubot/terraform-operator/pkg/apis/terraform/v1alpha1"
