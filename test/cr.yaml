@@ -3,7 +3,6 @@ kind: AwsS3Bucket
 metadata:
   name: s3-bucket
 spec:
-  arn: ""
   replication_configuration: []
   bucket_prefix: ""
   website: []
@@ -12,11 +11,8 @@ spec:
     target_prefix: ""
   server_side_encryption_configuration: []
   policy: ""
-  lifecyclerule: []
+  lifecycle_rule: []
   force_destroy: false
-  requestpayer: ""
   acl: ""
   cors_rule: []
-  hostedzoneid: ""
-  region: ""
   tags: {}
