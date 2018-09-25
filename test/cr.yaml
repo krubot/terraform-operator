@@ -1,28 +1,4 @@
-apiversion: terraform.io/v1alpha1
+apiVersion: terraform.io/v1alpha1
 kind: AwsS3Bucket
 metadata:
-  name: example-aws-s3-bucket
-spec:
-  arn: ""
-  replicationconfiguration: []
-  bucketprefix: ""
-  website: []
-  logging:
-    targetbucket: ""
-    targetprefix: ""
-  serversideencryptionconfiguration: []
-  bucketdomainname: ""
-  policy: ""
-  websiteendpoint: ""
-  websitedomain: ""
-  lifecyclerule: []
-  forcedestroy: false
-  requestpayer: ""
-  acl: ""
-  corsrule: []
-  hostedzoneid: ""
-  region: ""
-  versioning: []
-  accelerationstatus: ""
-  tags: {}
-  bucket: ""
+  name: s3-bucket

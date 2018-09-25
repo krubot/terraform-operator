@@ -35,3 +35,4 @@ spec:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
               value: "terraform-operator"
+      serviceAccountName: terraform-operator

@@ -1,16 +1,17 @@
 ---
-  apiVersion: helm.integrations.flux.weave.works/v1alpha2
-  kind: FluxHelmRelease
-  metadata:
-    name: terraform-operator
-    namespace: operator
-    labels:
-      chart: terraform-operator
-  spec:
-    chartGitPath: terraform-operator
-    values:
-      replicaCount: 1
-      image:
-        repository: quay.io/krubot/terraform-operator
-        tag: latest
-        pullPolicy: Always
+
+apiVersion: helm.integrations.flux.weave.works/v1alpha2
+kind: FluxHelmRelease
+metadata:
+  name: terraform-operator
+  namespace: operator
+  labels:
+    chart: terraform-operator
+spec:
+  chartGitPath: terraform-operator
+  values:
+    replicaCount: 1
+    image:
+      repository: quay.io/krubot/terraform-operator
+      tag: latest
+      pullPolicy: Always
