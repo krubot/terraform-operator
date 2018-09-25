@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 )
 
-const TFPATH = "/tmp/terraform-operator"
+const TFPATH = "/tmp"
 
 type Resource struct {
 	Resource map[string]interface{} `json:"resource"`
