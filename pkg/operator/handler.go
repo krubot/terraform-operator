@@ -9,13 +9,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const ResourceName="aws_s3_bucket"
+const ResourceName = "aws_s3_bucket"
 
 func NewHandler() sdk.Handler {
 	return &Handler{}
 }
 
-type Handler struct {}
+type Handler struct{}
 
 // ObjectCreated is called when an object is created
 func (t *Handler) Handle(ctx context.Context, event sdk.Event) error {
