@@ -1,6 +1,6 @@
 # Terraform Operator
 
-Currently still in POC stage, there are plans to extend this functionality soon.
+Currently still in POC stage, there are plans to extend this functionality soon. Feel free to create issues but note it's only one person working here 😄
 
 ## Pre-requisites
 
@@ -20,6 +20,12 @@ The following are needed to run this repo:
 
  ```sh
 operator-sdk build quay.io/YOURUSER/terraform-operator:latest
+ ```
+
+ Now push to `quay.io` by running:
+
+ ```sh
+docker push quay.io/YOURUSER/terraform-operator:latest
  ```
 
  ## Running Helm and Flux
@@ -70,3 +76,7 @@ In order to sync your cluster state with git you need to copy the public key and
 Open GitHub, navigate to your fork, go to **Setting > Deploy keys**, click on **Add deploy key**, give it a name, check **Allow write access**, paste the Flux public key and click **Add key**.
 
 Once Flux has confirmed access to the repository, it will start deploying the workload. After a while you will be able to see the Helm releases listed like so:
+
+## Running some tests
+
+To test that the deployment has worked you can run some custom resource files in the testing folder.
