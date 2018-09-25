@@ -21,11 +21,16 @@ type Handler struct {}
 func (t *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	switch o := event.Object.(type) {
 	case *v1alpha1.AwsS3Bucket:
-		b, err := terraform.RenderToTerraform(o.Spec, ResourceName, string(o.GetUID()))
+		uid := string(o.GetUID())
+		b, err := terraform.RenderToTerraform(o.Spec, ResourceName, uid)
 		if err != nil {
 			return err
 		}
 		logrus.Infof("%s", string(b))
+		err = terraform.WriteToFile(b, fmt.Sprintf("%s-%s", ResourceName, uid))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
