@@ -4,39 +4,11 @@ metadata:
   name: terraform-operator
 rules:
 - apiGroups:
-  - awss3buckets.terraform.io
+  - "*"
   resources:
   - "*"
   verbs:
   - "*"
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - services
-  - endpoints
-  - persistentvolumeclaims
-  - events
-  - configmaps
-  - secrets
-  verbs:
-  - "*"
-- apiGroups:
-  - awss3buckets
-  resources:
-  - deployments
-  - daemonsets
-  - replicasets
-  - statefulsets
-  verbs:
-  - "*"
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - list
-  - watch
 
 ---
 
