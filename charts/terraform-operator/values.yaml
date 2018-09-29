@@ -6,5 +6,6 @@ image:
   tag: latest
   pullPolicy: Always
 
+pspEnable: true
 nameOverride: ""
 fullnameOverride: ""
