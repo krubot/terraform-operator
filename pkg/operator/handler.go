@@ -20,10 +20,10 @@ type Handler struct{}
 
 // ObjectCreated is called when an object is created
 func (t *Handler) Handle(ctx context.Context, event sdk.Event) error {
-	switch o := event.Object.(type) {
+	switch tf := event.Object.(type) {
 	case *v1alpha1.AwsS3Bucket:
-		uid := string(o.GetUID())
-		b, err := terraform.RenderToTerraform(o.Spec, ResourceName, uid)
+		uid := string(tf.GetUID())
+		b, err := terraform.RenderToTerraform(tf.Spec, ResourceName, uid)
 		if err != nil {
 			return err
 		}
@@ -32,6 +32,8 @@ func (t *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if err != nil {
 			return err
 		}
+		tf.Status = "Created"
+		return sdk.Update(tf)
 	}
 	return nil
 }

@@ -14,6 +14,7 @@ func (in *AwsS3Bucket) DeepCopyInto(out *AwsS3Bucket) {
 	out.TypeMeta = in.TypeMeta
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
 	in.Spec.DeepCopyInto(&out.Spec)
+	//in.Status.DeepCopyInto(&out.Status)
 	return
 }
 
