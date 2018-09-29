@@ -1,6 +1,7 @@
 {{- if .Values.pspEnable }}
 apiVersion: extensions/v1beta1
 kind: PodSecurityPolicy
+metadata:
   name: {{ include "terraform.fullname" . }}
   labels:
     app: {{ include "terraform.name" . }}
@@ -31,7 +32,7 @@ spec:
     rule: 'MustRunAsNonRoot'
   seLinux:
     # This policy assumes the nodes are using AppArmor rather than SELinux.
-    rule: 'MustRunAsNonRoot'
+    rule: 'RunAsAny'
   supplementalGroups:
     rule: 'MustRunAs'
     ranges:
