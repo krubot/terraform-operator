@@ -9,5 +9,10 @@ spec:
     listKind: AwsS3BucketList
     plural: awss3buckets
     singular: awss3bucket
+  additionalPrinterColumns:
+    - name: Status
+      type: string
+      description: Description of the current status
+      JSONPath: .status
   scope: Namespaced
   version: v1alpha1
