@@ -22,6 +22,11 @@ type Handler struct{}
 func (t *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	switch tf := event.Object.(type) {
 	case *v1alpha1.AwsS3Bucket:
+		tf.Status = "Started"
+		err := sdk.Update(tf)
+		if err != nil {
+			return err
+		}
 		uid := string(tf.GetUID())
 		b, err := terraform.RenderToTerraform(tf.Spec, ResourceName, uid)
 		if err != nil {
@@ -33,7 +38,19 @@ func (t *Handler) Handle(ctx context.Context, event sdk.Event) error {
 			return err
 		}
 		tf.Status = "Created"
-		return sdk.Update(tf)
+		err = sdk.Update(tf)
+		if err != nil {
+			return err
+		}
+		err = terraform.TerraformValidate()
+		if err != nil {
+			return err
+		}
+		tf.Status = "Validated"
+		err = sdk.Update(tf)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

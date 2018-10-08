@@ -2,11 +2,14 @@
 package terraform
 
 import (
-	"encoding/json"
+	"fmt"
+	"bytes"
+	"os/exec"
 	"io/ioutil"
+	"encoding/json"
 )
 
-const TFPATH = "/tmp"
+const TFPATH = "/etc/infra/"
 
 type Resource struct {
 	Resource map[string]interface{} `json:"resource"`
@@ -33,5 +36,16 @@ func WriteToFile(b []byte, name string) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func TerraformValidate() error {
+	var out bytes.Buffer
+	cmd := exec.Command("./run-terraform-validate.sh")
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("terraform run output:\n%q", out.String())
 	return nil
 }
