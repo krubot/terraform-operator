@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 )
 
-const TFPATH = "/etc/infra/"
+const TFPATH = "/tmp"
 
 type Resource struct {
 	Resource map[string]interface{} `json:"resource"`
@@ -41,11 +41,15 @@ func WriteToFile(b []byte, name string) error {
 
 func TerraformValidate() error {
 	var out bytes.Buffer
-	cmd := exec.Command("./run-terraform-validate.sh")
+	var stderr bytes.Buffer
+	cmd := exec.Command("./scripts/run-terraform-validate.sh")
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
 	err := cmd.Run()
 	if err != nil {
-		return err
+    fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+    return err
 	}
-	fmt.Printf("terraform run output:\n%q", out.String())
+	fmt.Println("terraform run output:\n" + out.String())
 	return nil
 }
