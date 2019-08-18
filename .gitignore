@@ -1,8 +1,9 @@
+# Terraform-operator binary output
+terraform-operator
 
-# Temporary Build Files
-tmp/_output
-tmp/_test
-
+# Binary output
+build/_output
+build/_test
 
 # Created by https://www.gitignore.io/api/go,vim,emacs,visualstudiocode
 
@@ -16,59 +17,42 @@ tmp/_test
 auto-save-list
 tramp
 .\#*
-
 # Org-mode
 .org-id-locations
 *_archive
-
 # flymake-mode
 *_flymake.*
-
 # eshell files
 /eshell/history
 /eshell/lastdir
-
 # elpa packages
 /elpa/
-
 # reftex files
 *.rel
-
 # AUCTeX auto folder
 /auto/
-
 # cask packages
 .cask/
 dist/
-
 # Flycheck
 flycheck_*.el
-
 # server auth directory
 /server/
-
 # projectiles files
 .projectile
 projectile-bookmarks.eld
-
 # directory configuration
 .dir-locals.el
-
 # saveplace
 places
-
 # url cache
 url/cache/
-
 # cedet
 ede-projects.el
-
 # smex
 smex-items
-
 # company-statistics
 company-statistics-cache.el
-
 # anaconda-mode
 anaconda-mode/
 
@@ -79,10 +63,8 @@ anaconda-mode/
 *.dll
 *.so
 *.dylib
-
 # Test binary, build with 'go test -c'
 *.test
-
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
@@ -99,11 +81,6 @@ tags
 
 ### VisualStudioCode ###
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 .history
-
 
 # End of https://www.gitignore.io/api/go,vim,emacs,visualstudiocode
