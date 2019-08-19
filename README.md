@@ -2,7 +2,7 @@
 
 Currently still in POC stage, there are plans to extend this functionality soon. Feel free to create issues but note it's only one person working here 😄
 
-Simply want the binary then run `make build`.
+Simply want the image run `make image`.
 
 ## Pre-requisites
 

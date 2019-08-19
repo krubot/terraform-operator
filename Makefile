@@ -1,5 +1,6 @@
-HUB=github.com/krubot/terraform-operator
+HUB=quay.io/krubot/terraform-operator
 
-build:
-	export GO111MODULE=on
-	go build $(HUB)/cmd/terraform-operator
+.PHONY: image
+
+image:
+	operator-sdk build $(HUB)
