@@ -45,25 +45,31 @@ docker push quay.io/YOURUSER/terraform-operator:latest
  Then deploy Tiller in `kube-system` namespace:
 
  ```sh
- helm init --skip-refresh --upgrade --service-account tiller
+ helm init --skip-refresh --upgrade --wait --service-account tiller
  ```
 
  Add the Flux repository of Weaveworks:
 
  ```sh
- helm repo add weaveworks https://weaveworks.github.io/flux
+ helm repo add fluxcd https://charts.fluxcd.io
+ ```
+
+Apply the Helm Release CRD:
+
+ ```sh
+ kubectl apply -f https://raw.githubusercontent.com/fluxcd/flux/helm-0.10.1/deploy-helm/flux-helm-release-crd.yaml
  ```
 
 Next install flux and replace the `git.url` with your repos url:
 
 
 ```sh
-helm install --name flux \
+helm upgrade -i flux \
 --set helmOperator.create=true \
---set git.url=ssh://git@github.com/YOURUSER/terraform-operator \
---set helmOperator.git.chartsPath=charts \
+--set helmOperator.createCRD=false \
+--set git.url=git@github.com:YOURUSER/terraform-operator \
 --namespace flux \
-weaveworks/flux
+fluxcd/flux
 ```
 
 Next obtain flux's public ssh-key by running:

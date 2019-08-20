@@ -1,0 +1,24 @@
+---
+
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: terraform-operator
+  namespace: infra
+  labels:
+    chart: terraform-operator
+  annotations:
+    flux.weave.works/automated: "false"
+    flux.weave.works/tag.chart-image: glob:1.21.*
+spec:
+  releaseName: terraform
+  chart:
+    git: ssh://git@github.com/krubot/terraform-operator
+    ref: master
+    path: charts/terraform-operator
+  values:
+    replicaCount: 1
+    image:
+      repository: quay.io/krubot/terraform-operator
+      tag: latest
+      pullPolicy: Always
