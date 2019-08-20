@@ -1,6 +1,3 @@
-# Terraform-operator binary output
-terraform-operator
-
 # Binary output
 build/_output
 build/_test

@@ -1,3 +1,0 @@
-apiVersion: terraform.io/v1alpha1
-kind: AwsS3Bucket
-projectName: terraform-operator
