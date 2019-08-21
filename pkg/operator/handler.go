@@ -27,8 +27,7 @@ func (t *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if err != nil {
 			return err
 		}
-		uid := string(tf.GetUID())
-		b, err := terraform.RenderToTerraform(tf.Spec, ResourceName, uid)
+		b, err := terraform.RenderToTerraform(tf.Spec, ResourceName, tf.metadata.name)
 		if err != nil {
 			return err
 		}

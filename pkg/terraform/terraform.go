@@ -32,7 +32,7 @@ func RenderToTerraform(i interface{}, resourceName, instanceName string) ([]byte
 }
 
 func WriteToFile(b []byte, name string) error {
-	err := ioutil.WriteFile(TFPATH+"/"+name+".tf", b, 0755)
+	err := ioutil.WriteFile(TFPATH+"/"+name+".tf.json", b, 0755)
 	if err != nil {
 		return err
 	}
