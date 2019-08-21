@@ -27,13 +27,12 @@ func (t *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if err != nil {
 			return err
 		}
-		uid := string(tf.GetUID())
-		b, err := terraform.RenderToTerraform(tf.Spec, ResourceName, uid)
+		b, err := terraform.RenderToTerraform(tf.Spec, ResourceName, tf.ObjectMeta.Name)
 		if err != nil {
 			return err
 		}
 		logrus.Infof("%s", string(b))
-		err = terraform.WriteToFile(b, fmt.Sprintf("%s-%s", ResourceName, uid))
+		err = terraform.WriteToFile(b, fmt.Sprintf("%s-%s", ResourceName, tf.ObjectMeta.Name))
 		if err != nil {
 			return err
 		}
