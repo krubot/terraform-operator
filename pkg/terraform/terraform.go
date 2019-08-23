@@ -4,12 +4,13 @@ package terraform
 import (
 	"fmt"
 	"bytes"
+	"os"
 	"os/exec"
 	"io/ioutil"
 	"encoding/json"
 )
 
-const TFPATH = "/tmp"
+var TFPATH = os.Getenv("TFPATH")
 
 type Resource struct {
 	Resource map[string]interface{} `json:"resource"`
@@ -42,7 +43,7 @@ func WriteToFile(b []byte, name string) error {
 func TerraformValidate() error {
 	var out bytes.Buffer
 	var stderr bytes.Buffer
-	cmd := exec.Command("./scripts/run-terraform-validate.sh")
+	cmd := exec.Command("./terraform-validate.sh")
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()
