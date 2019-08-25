@@ -28,6 +28,14 @@ spec:
             name: metrics
           command:
           - terraform-operator
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
           env:
             - name: WATCH_NAMESPACE
               valueFrom:
@@ -35,4 +43,6 @@ spec:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
               value: "terraform-operator"
+            - name: TFPATH
+              value: "/tmp"
       serviceAccountName: terraform-operator

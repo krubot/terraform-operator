@@ -22,6 +22,7 @@ COPY build/_output/bin/terraform-operator ${OPERATOR}
 
 COPY --from=terraform /out /bin
 COPY build/bin /usr/local/bin
+COPY build/scripts /usr/local/bin
 RUN  /usr/local/bin/user_setup
 
 ENTRYPOINT ["/usr/local/bin/entrypoint"]
