@@ -1,0 +1,8 @@
+apiVersion: terraform.io/v1alpha1
+kind: Provider
+metadata:
+  name: kubernetes
+spec:
+  host: "https://192.168.129.223:6443"
+  token: "file(/var/run/secrets/kubernetes.io/serviceaccount/token)"
+  insecure: true

@@ -58,6 +58,7 @@ Apply the Helm Release CRD:
 
  ```sh
  kubectl apply -f https://raw.githubusercontent.com/fluxcd/flux/helm-0.10.1/deploy-helm/flux-helm-release-crd.yaml
+ kubectl apply -f https://raw.githubusercontent.com/krubot/terraform-operator/master/deploy/crds/terraform_v1alpha1_provider_crd.yaml
  ```
 
 Next install flux and replace the `git.url` with your repos url:
@@ -75,8 +76,7 @@ fluxcd/flux
 Next obtain flux's public ssh-key by running:
 
 ```sh
-FLUX_POD=$(kubectl get pods --namespace flux -l "app=flux,release=flux" -o jsonpath="{.items[0].metadata.name}")
-kubectl -n flux logs $FLUX_POD | grep identity.pub | cut -d '"' -f2
+kubectl -n flux logs deployment/flux | grep identity.pub | cut -d '"' -f2
 ```
 
 In order to sync your cluster state with git you need to copy the public key and create a deploy key with write access on your GitHub repository.
@@ -87,4 +87,8 @@ Once Flux has confirmed access to the repository, it will start deploying the wo
 
 ## Running some tests
 
-To test that the deployment has worked you can run some custom resource files in the testing folder.
+To test that the deployment has worked you can run some custom resource files with the follow command:
+
+```sh
+kubectl -n infra apply -f https://raw.githubusercontent.com/krubot/terraform-operator/master/deploy/crds/terraform_v1alpha1_provider_cr.yaml
+```
