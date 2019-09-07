@@ -10,11 +10,11 @@ import (
 // ProviderSpec defines the desired state of Provider
 // +kubebuilder:subresource:status
 type ProviderSpec struct {
-		// Kubernetes provider host
+		// Kubernetes provider hostname (in form of URI) of Kubernetes master
 		Host			string	`json:"host,omitempty"`
-		// Kubernetes provider token
+		// Kubernetes provider token of your service account
 		Token			string	`json:"token,omitempty"`
-		// Kubernetes provider CA
+		// Kubernetes provider whether server should be accessed without verifying the TLS certificate
 		Insecure	bool		`json:"insecure,omitempty"`
 
 		// AWS provider region

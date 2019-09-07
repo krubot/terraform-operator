@@ -167,6 +167,8 @@ func (r *ReconcileProvider) Reconcile(request reconcile.Request) (reconcile.Resu
 		}
 	}
 
+	time.Sleep(2 * time.Second)
+
 	err = terraform.TerraformValidate()
 	if err != nil {
 		return reconcile.Result{}, err
@@ -184,6 +186,8 @@ func (r *ReconcileProvider) Reconcile(request reconcile.Request) (reconcile.Resu
 			return reconcile.Result{}, err
 		}
 	}
+
+	time.Sleep(2 * time.Second)
 
 	err = terraform.TerraformPlan()
 	if err != nil {
