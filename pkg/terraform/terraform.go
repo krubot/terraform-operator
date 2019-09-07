@@ -12,17 +12,15 @@ import (
 
 var TFPATH = os.Getenv("TFPATH")
 
-type Resource struct {
-	Resource map[string]interface{} `json:"resource"`
+type Provider struct {
+	Provider map[string]interface{} `json:"provider"`
 }
 
-// RenderToTerraform takes an object, and attempts to construct the appropriate terraform json from it.
-func RenderToTerraform(i interface{}, resourceName, instanceName string) ([]byte, error) {
-	r := Resource{
-		Resource: map[string]interface{}{
-			resourceName: map[string]interface{}{
-				instanceName: i,
-			},
+// RenderProviderToTerraform takes an object, and attempts to construct the appropriate terraform json from it.
+func RenderProviderToTerraform(instance interface{}, providerName string) ([]byte, error) {
+	r := Provider{
+		Provider: map[string]interface{}{
+			providerName: instance,
 		},
 	}
 	b, err := json.MarshalIndent(r, "", "\t")
@@ -40,17 +38,59 @@ func WriteToFile(b []byte, name string) error {
 	return nil
 }
 
-func TerraformValidate() error {
+func TerraformInit() error {
 	var out bytes.Buffer
 	var stderr bytes.Buffer
-	cmd := exec.Command("./terraform-validate.sh")
+
+	cmd := exec.Command("terraform","init")
+	cmd.Dir = TFPATH
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()
+
 	if err != nil {
     fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
     return err
 	}
-	fmt.Println("terraform run output:\n" + out.String())
+
+	fmt.Println("terraform init output:\n" + out.String())
+	return nil
+}
+
+func TerraformValidate() error {
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+
+	cmd := exec.Command("terraform","validate")
+	cmd.Dir = TFPATH
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	if err != nil {
+    fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+    return err
+	}
+
+	fmt.Println("terraform validate output:\n" + out.String())
+	return nil
+}
+
+func TerraformPlan() error {
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+
+	cmd := exec.Command("terraform","plan")
+	cmd.Dir = TFPATH
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	if err != nil {
+    fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+    return err
+	}
+
+	fmt.Println("terraform validate output:\n" + out.String())
 	return nil
 }
