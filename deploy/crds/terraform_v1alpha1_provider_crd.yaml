@@ -30,13 +30,15 @@ spec:
         spec:
           properties:
             host:
-              description: Kubernetes provider host
+              description: Kubernetes provider hostname (in form of URI) of Kubernetes
+                master
               type: string
             insecure:
-              description: Kubernetes provider CA
+              description: Kubernetes provider whether server should be accessed without
+                verifying the TLS certificate
               type: boolean
             token:
-              description: Kubernetes provider token
+              description: Kubernetes provider token of your service account
               type: string
           type: object
         status:
