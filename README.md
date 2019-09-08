@@ -58,7 +58,6 @@ Apply the Helm Release CRD:
 
  ```sh
  kubectl apply -f https://raw.githubusercontent.com/fluxcd/flux/helm-0.10.1/deploy-helm/flux-helm-release-crd.yaml
- kubectl apply -f https://raw.githubusercontent.com/krubot/terraform-operator/master/deploy/crds/terraform_v1alpha1_provider_crd.yaml
  ```
 
 Next install flux and replace the `git.url` with your repos url:
