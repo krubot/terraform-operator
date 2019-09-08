@@ -91,6 +91,6 @@ func TerraformPlan() error {
     return err
 	}
 
-	fmt.Println("terraform validate output:\n" + out.String())
+	fmt.Println("terraform plan output:\n" + out.String())
 	return nil
 }
