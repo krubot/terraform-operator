@@ -3,6 +3,11 @@ kind: CustomResourceDefinition
 metadata:
   name: providers.terraform.io
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .status
+    description: Description of the current status
+    name: Status
+    type: string
   group: terraform.io
   names:
     kind: Provider

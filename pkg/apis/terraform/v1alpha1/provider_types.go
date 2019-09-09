@@ -16,25 +16,14 @@ type ProviderSpec struct {
 		Token			string	`json:"token,omitempty"`
 		// Kubernetes provider whether server should be accessed without verifying the TLS certificate
 		Insecure	bool		`json:"insecure,omitempty"`
-
-		// AWS provider region
-		// Region			string					`json:"region,omitempty"`
-		// AWS provider assume role
-		// AssumeRole	AssumeRoleSpec	`json:"assume_role,omitempty"`
 }
-
-// type AssumeRoleSpec struct {
-// 		RoleArn			string	`json:"role_arn,omitempty"`
-// 		SessionName	string	`json:"session_name,omitempty"`
-// 		ExternalId	string	`json:"external_id,omitempty"`
-// 		Policy			string	`json:"policy,omitempty"`
-// }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Provider is the Schema for the providers API
 // +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status",description="Description of the current status"
 type Provider struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
