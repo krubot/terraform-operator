@@ -4,14 +4,15 @@ require (
 	github.com/NYTimes/gziphandler v1.0.1 // indirect
 	github.com/go-openapi/spec v0.19.0
 	github.com/operator-framework/operator-sdk v0.10.0
-	github.com/segmentio/aws-okta v0.22.1 // indirect
 	github.com/spf13/pflag v1.0.3
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
+	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
+	golang.org/x/sys v0.0.0-20190710143415-6ec70d6a5542 // indirect
 	k8s.io/api v0.0.0-20190612125737-db0771252981
 	k8s.io/apimachinery v0.0.0-20190612125636-6a5db36e93ad
 	k8s.io/client-go v11.0.0+incompatible
 	k8s.io/kube-openapi v0.0.0-20190603182131-db7b694dc208
 	sigs.k8s.io/controller-runtime v0.1.12
-	sigs.k8s.io/controller-tools v0.1.10 // indirect
 )
 
 // Pinned to kubernetes-1.13.4

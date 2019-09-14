@@ -1,5 +1,6 @@
 
 replicaCount: 1
+etcdDir: /etc/kubernetes/pki/etcd
 
 image:
   repository: quay.io/krubot/terraform-operator
