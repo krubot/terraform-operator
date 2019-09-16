@@ -47,4 +47,11 @@ spec:
               value: "terraform-operator"
             - name: TFPATH
               value: "/tmp"
+          volumeMounts:
+            - mountPath: {{ .Values.etcdDir }}
+              name: etcd-certs
       serviceAccountName: terraform-operator
+      volumes:
+        - name: etcd-certs
+          hostPath:
+            path: {{ .Values.etcdDir }}

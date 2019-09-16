@@ -9,4 +9,9 @@ generate:
 image:
 	operator-sdk build $(HUB)
 
+packages:
+	go get -u
+	go mod tidy
+	go mod vendor
+
 .PHONY: all image generate

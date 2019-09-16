@@ -3,6 +3,6 @@ kind: Provider
 metadata:
   name: kubernetes
 spec:
-  host: "https://192.168.1.114:6443"
+  host: "https://192.168.86.106:6443"
   token: "${file(\"/var/run/secrets/kubernetes.io/serviceaccount/token\")}"
   insecure: true

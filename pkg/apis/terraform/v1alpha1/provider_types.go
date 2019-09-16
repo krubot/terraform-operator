@@ -11,10 +11,13 @@ import (
 // +kubebuilder:subresource:status
 type ProviderSpec struct {
 		// Kubernetes provider hostname (in form of URI) of Kubernetes master
+		// +optional
 		Host			string	`json:"host,omitempty"`
 		// Kubernetes provider token of your service account
+		// +optional
 		Token			string	`json:"token,omitempty"`
 		// Kubernetes provider whether server should be accessed without verifying the TLS certificate
+		// +optional
 		Insecure	bool		`json:"insecure,omitempty"`
 }
 
