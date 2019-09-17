@@ -10,15 +10,15 @@ import (
 // ProviderSpec defines the desired state of Provider
 // +kubebuilder:subresource:status
 type ProviderSpec struct {
-		// Kubernetes provider hostname (in form of URI) of Kubernetes master
-		// +optional
-		Host			string	`json:"host,omitempty"`
-		// Kubernetes provider token of your service account
-		// +optional
-		Token			string	`json:"token,omitempty"`
-		// Kubernetes provider whether server should be accessed without verifying the TLS certificate
-		// +optional
-		Insecure	bool		`json:"insecure,omitempty"`
+	// Kubernetes provider hostname (in form of URI) of Kubernetes master
+	// +optional
+	Host string `json:"host,omitempty"`
+	// Kubernetes provider token of your service account
+	// +optional
+	Token string `json:"token,omitempty"`
+	// Kubernetes provider whether server should be accessed without verifying the TLS certificate
+	// +optional
+	Insecure bool `json:"insecure,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -32,7 +32,7 @@ type Provider struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   ProviderSpec `json:"spec,omitempty"`
-	Status string     	`json:"status,omitempty"`
+	Status string       `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
