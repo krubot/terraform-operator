@@ -11,9 +11,9 @@ import (
 // +kubebuilder:subresource:status
 type ModuleSpec struct {
 	// Kubernetes namespace module source
-	Source					string	`json:"source,omitempty"`
+	Source string `json:"source,omitempty"`
 	// Kubernetes namespace name
-	NamespaceName		string	`json:"namespace_name,omitempty"`
+	NamespaceName string `json:"namespace_name,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -26,8 +26,8 @@ type Module struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ModuleSpec   `json:"spec,omitempty"`
-	Status string `json:"status,omitempty"`
+	Spec   ModuleSpec `json:"spec,omitempty"`
+	Status string     `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

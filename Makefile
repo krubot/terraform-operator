@@ -14,4 +14,7 @@ packages:
 	go mod tidy
 	go mod vendor
 
+fmt:
+	go fmt ./...
+
 .PHONY: all image generate
