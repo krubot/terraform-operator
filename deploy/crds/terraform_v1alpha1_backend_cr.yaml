@@ -2,6 +2,7 @@ apiVersion: terraform.io/v1alpha1
 kind: Backend
 metadata:
   name: etcdv3
+  namespace: infra
 spec:
   endpoints:
     - "https://192.168.86.106:2379"

@@ -2,6 +2,7 @@ apiVersion: terraform.io/v1alpha1
 kind: Module
 metadata:
   name: example-namespace
+  namespace: infra
 spec:
   source: "/var/lib/modules/kubernetes/namespace/"
   namespace_name: "example-namespace"

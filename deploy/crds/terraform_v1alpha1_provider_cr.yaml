@@ -2,6 +2,7 @@ apiVersion: terraform.io/v1alpha1
 kind: Provider
 metadata:
   name: kubernetes
+  namespace: infra
 spec:
   host: "https://192.168.86.106:6443"
   token: "${file(\"/var/run/secrets/kubernetes.io/serviceaccount/token\")}"
