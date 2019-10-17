@@ -30,11 +30,17 @@ type BackendSpec struct {
 	KeyPath string `json:"key_path,omitempty"`
 }
 
+// Backend is the Schema for the Backends API
+
+// +genclient
+// +genclient:nonNamespaced
+// +genclient:skipVerbs=updateStatus
+// +k8s:openapi-gen=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// Backend is the Schema for the Backends API
-// +k8s:openapi-gen=true
+// +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:path=backends
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status",description="Description of the current status"
 type Backend struct {
 	metav1.TypeMeta   `json:",inline"`

@@ -7,25 +7,21 @@ import (
 
 	terraformv1alpha1 "github.com/krubot/terraform-operator/pkg/apis/terraform/v1alpha1"
 	terraform "github.com/krubot/terraform-operator/pkg/terraform"
+  util "github.com/krubot/terraform-operator/pkg/util"
+
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	// "sigs.k8s.io/controller-runtime/pkg/event"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 var log = logf.Log.WithName("controller_provider")
-
-/**
- * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
- * business logic.  Delete these comments after modifying this file.*
- **/
 
 // Add creates a new Provider Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -47,7 +43,16 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Provider
-	err = c.Watch(&source.Kind{Type: &terraformv1alpha1.Provider{}}, &handler.EnqueueRequestForObject{}, predicate.ResourceVersionChangedPredicate{})
+	err = c.Watch(&source.Kind{Type: &terraformv1alpha1.Provider{}}, &handler.EnqueueRequestForObject{}, util.ResourceGenerationOrFinalizerChangedPredicate{})
+	if err != nil {
+		return err
+	}
+
+	// Watch for changes to namespace resources
+	err = c.Watch(&source.Kind{Type: &corev1.Namespace{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &terraformv1alpha1.Provider{},
+	})
 	if err != nil {
 		return err
 	}
@@ -87,7 +92,8 @@ func (r *ReconcileProvider) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	// Fetch the Provider instance
 	instance := &terraformv1alpha1.Provider{}
-	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
+
+	err := r.client.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -104,9 +110,16 @@ func (r *ReconcileProvider) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, err
 	}
 
-	err = terraform.WriteToFile(b, instance.ObjectMeta.Name)
+	namespaceList, err := listNamespaces(r.client)
 	if err != nil {
 		return reconcile.Result{}, err
+	}
+
+	for _, v := range namespaceList.Items {
+		err = terraform.WriteToFile(b, v.Name, instance.ObjectMeta.Name)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
 	}
 
 	// Update CR with the AppStatus == Created
@@ -115,7 +128,7 @@ func (r *ReconcileProvider) Reconcile(request reconcile.Request) (reconcile.Resu
 		instance.Status = "Ready"
 
 		// Update the CR
-		err = r.client.Status().Update(context.TODO(), instance)
+		err = r.client.Status().Update(context.Background(), instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to update Project Status for the Provider")
 			return reconcile.Result{}, err
@@ -123,4 +136,20 @@ func (r *ReconcileProvider) Reconcile(request reconcile.Request) (reconcile.Resu
 	}
 
 	return reconcile.Result{}, nil
+}
+
+func listNamespaces(c client.Client) (corev1.NamespaceList, error) {
+	// Fetch the Namespace list instance
+	providerNamespaceList := corev1.NamespaceList{}
+	backendOpts := client.ListOptions{}
+
+  // This is a hack, sometimes we can return nothing so we need to cycle till we get something
+	// Fill free to tell me what I'm doing wrong here!
+	for len(providerNamespaceList.Items) == 0 {
+		if err := c.List(context.Background(), &backendOpts, &providerNamespaceList); err != nil {
+			return providerNamespaceList, err
+		}
+	}
+
+	return providerNamespaceList, nil
 }

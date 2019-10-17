@@ -2,10 +2,9 @@ apiVersion: terraform.io/v1alpha1
 kind: Backend
 metadata:
   name: etcdv3
-  namespace: infra
 spec:
   endpoints:
-    - "https://192.168.86.106:2379"
+    - "https://192.168.56.5:2379"
   lock: true
   prefix: "terraform-state/"
   cacert_path: "/etc/kubernetes/pki/etcd/ca.crt"

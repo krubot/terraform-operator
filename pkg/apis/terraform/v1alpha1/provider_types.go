@@ -21,11 +21,17 @@ type ProviderSpec struct {
 	Insecure bool `json:"insecure,omitempty"`
 }
 
+// Provider is the Schema for the providers API
+
+// +genclient
+// +genclient:nonNamespaced
+// +genclient:skipVerbs=updateStatus
+// +k8s:openapi-gen=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// Provider is the Schema for the providers API
-// +k8s:openapi-gen=true
+// +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:path=providers
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status",description="Description of the current status"
 type Provider struct {
 	metav1.TypeMeta   `json:",inline"`

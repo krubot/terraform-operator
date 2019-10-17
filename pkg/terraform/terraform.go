@@ -71,20 +71,25 @@ func RenderBackendToTerraform(instance interface{}, backendName string) ([]byte,
 	return b, nil
 }
 
-func WriteToFile(b []byte, name string) error {
-	err := ioutil.WriteFile(TFPATH+"/"+name+".tf.json", b, 0755)
+func WriteToFile(b []byte, namespace string, name string) error {
+	err := os.MkdirAll(TFPATH+"/"+namespace, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(TFPATH+"/"+namespace+"/"+name+".tf.json", b, 0755)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func TerraformInit() error {
+func TerraformInit(namespace string) error {
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 
 	cmd := exec.Command("terraform", "init")
-	cmd.Dir = TFPATH
+	cmd.Dir = TFPATH+"/"+namespace
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()
@@ -98,12 +103,12 @@ func TerraformInit() error {
 	return nil
 }
 
-func TerraformValidate() error {
+func TerraformValidate(namespace string) error {
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 
 	cmd := exec.Command("terraform", "validate")
-	cmd.Dir = TFPATH
+	cmd.Dir = TFPATH+"/"+namespace
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()
@@ -117,12 +122,12 @@ func TerraformValidate() error {
 	return nil
 }
 
-func TerraformPlan() error {
+func TerraformPlan(namespace string) error {
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 
 	cmd := exec.Command("terraform", "plan")
-	cmd.Dir = TFPATH
+	cmd.Dir = TFPATH+"/"+namespace
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()
@@ -136,12 +141,12 @@ func TerraformPlan() error {
 	return nil
 }
 
-func TerraformApply() error {
+func TerraformApply(namespace string) error {
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 
 	cmd := exec.Command("terraform", "apply", "-auto-approve")
-	cmd.Dir = TFPATH
+	cmd.Dir = TFPATH+"/"+namespace
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()
