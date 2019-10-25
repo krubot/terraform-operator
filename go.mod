@@ -2,16 +2,23 @@ module github.com/krubot/terraform-operator
 
 require (
 	github.com/go-openapi/spec v0.19.0
+	github.com/gogo/protobuf v1.3.1 // indirect
+	github.com/openshift-evangelists/crd-code-generation v0.0.0-20180227162415-5ae21b8b0582 // indirect
 	github.com/operator-framework/operator-sdk v0.10.0
 	github.com/spf13/pflag v1.0.3
+	go.uber.org/atomic v1.4.0 // indirect
+	go.uber.org/multierr v1.2.0 // indirect
+	go.uber.org/zap v1.11.0 // indirect
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
-	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
+	golang.org/x/net v0.0.0-20191021144547-ec77196f6094 // indirect
 	golang.org/x/sys v0.0.0-20190710143415-6ec70d6a5542 // indirect
+	golang.org/x/text v0.3.2 // indirect
 	k8s.io/api v0.0.0-20190612125737-db0771252981
-	k8s.io/apimachinery v0.0.0-20190612125636-6a5db36e93ad
+	k8s.io/apimachinery v0.0.0-20191020214737-6c8691705fc5
 	k8s.io/client-go v11.0.0+incompatible
+	k8s.io/klog v1.0.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20190603182131-db7b694dc208
-	sigs.k8s.io/controller-runtime v0.1.12
+	sigs.k8s.io/controller-runtime v0.3.0
 )
 
 // Pinned to kubernetes-1.13.4

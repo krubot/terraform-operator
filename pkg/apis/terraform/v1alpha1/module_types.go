@@ -16,11 +16,17 @@ type ModuleSpec struct {
 	NamespaceName string `json:"namespace_name,omitempty"`
 }
 
+// Module is the Schema for the modules API
+
+// +genclient
+// +genclient:Namespaced
+// +genclient:skipVerbs=updateStatus
+// +k8s:openapi-gen=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// Module is the Schema for the modules API
-// +k8s:openapi-gen=true
+// +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:path=modules
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status",description="Description of the current status"
 type Module struct {
 	metav1.TypeMeta   `json:",inline"`

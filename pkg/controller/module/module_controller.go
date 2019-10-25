@@ -8,6 +8,8 @@ import (
 
 	terraformv1alpha1 "github.com/krubot/terraform-operator/pkg/apis/terraform/v1alpha1"
 	terraform "github.com/krubot/terraform-operator/pkg/terraform"
+	util "github.com/krubot/terraform-operator/pkg/util"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -20,11 +22,6 @@ import (
 )
 
 var log = logf.Log.WithName("controller_module")
-
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
 
 // Add creates a new Module Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -46,7 +43,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Module
-	err = c.Watch(&source.Kind{Type: &terraformv1alpha1.Module{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &terraformv1alpha1.Module{}}, &handler.EnqueueRequestForObject{},util.ResourceGenerationOrFinalizerChangedPredicate{})
 	if err != nil {
 		return err
 	}
@@ -86,7 +83,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 
 	// Fetch the Module instance
 	instance := &terraformv1alpha1.Module{}
-	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.client.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -105,27 +102,27 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
-	err = terraform.WriteToFile(b, instance.ObjectMeta.Name)
+	err = terraform.WriteToFile(b, instance.ObjectMeta.Namespace, instance.ObjectMeta.Name)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	err = terraform.TerraformInit()
+	err = terraform.TerraformInit(instance.ObjectMeta.Namespace)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	err = terraform.TerraformValidate()
+	err = terraform.TerraformValidate(instance.ObjectMeta.Namespace)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	err = terraform.TerraformPlan()
+	err = terraform.TerraformPlan(instance.ObjectMeta.Namespace)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	err = terraform.TerraformApply()
+	err = terraform.TerraformApply(instance.ObjectMeta.Namespace)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -136,7 +133,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		instance.Status = "Ready"
 
 		// Update the CR
-		err = r.client.Status().Update(context.TODO(), instance)
+		err = r.client.Status().Update(context.Background(), instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to update Project Status for the Provider")
 			return reconcile.Result{}, err

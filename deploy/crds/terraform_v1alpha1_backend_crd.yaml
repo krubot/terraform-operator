@@ -14,7 +14,7 @@ spec:
     listKind: BackendList
     plural: backends
     singular: backend
-  scope: Namespaced
+  scope: Cluster
   subresources:
     status: {}
   validation:
