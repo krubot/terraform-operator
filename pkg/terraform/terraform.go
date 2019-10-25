@@ -89,7 +89,7 @@ func TerraformInit(namespace string) error {
 	var stderr bytes.Buffer
 
 	cmd := exec.Command("terraform", "init")
-	cmd.Dir = TFPATH+"/"+namespace
+	cmd.Dir = TFPATH + "/" + namespace
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()
@@ -108,7 +108,7 @@ func TerraformValidate(namespace string) error {
 	var stderr bytes.Buffer
 
 	cmd := exec.Command("terraform", "validate")
-	cmd.Dir = TFPATH+"/"+namespace
+	cmd.Dir = TFPATH + "/" + namespace
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()
@@ -127,7 +127,7 @@ func TerraformPlan(namespace string) error {
 	var stderr bytes.Buffer
 
 	cmd := exec.Command("terraform", "plan")
-	cmd.Dir = TFPATH+"/"+namespace
+	cmd.Dir = TFPATH + "/" + namespace
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()
@@ -146,7 +146,7 @@ func TerraformApply(namespace string) error {
 	var stderr bytes.Buffer
 
 	cmd := exec.Command("terraform", "apply", "-auto-approve")
-	cmd.Dir = TFPATH+"/"+namespace
+	cmd.Dir = TFPATH + "/" + namespace
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()

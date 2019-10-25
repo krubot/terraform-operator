@@ -92,7 +92,7 @@ func (r *ReconcileBackend) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	// Fetch the Backend instance
 	instance := &terraformv1alpha1.Backend{}
-	
+
 	err := r.client.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -142,11 +142,11 @@ func listNamespaces(c client.Client) (corev1.NamespaceList, error) {
 
 	// This is a hack, sometimes we can return nothing so we need to cycle till we get something
 	// Fill free to tell me what I'm doing wrong here!
-  for len(backendNamespaceList.Items) == 0 {
-	  if err := c.List(context.Background(), &backendOpts, &backendNamespaceList); err != nil {
-	  	return backendNamespaceList, err
-	  }
-  }
+	for len(backendNamespaceList.Items) == 0 {
+		if err := c.List(context.Background(), &backendOpts, &backendNamespaceList); err != nil {
+			return backendNamespaceList, err
+		}
+	}
 
 	return backendNamespaceList, nil
 }

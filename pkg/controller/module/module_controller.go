@@ -43,7 +43,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Module
-	err = c.Watch(&source.Kind{Type: &terraformv1alpha1.Module{}}, &handler.EnqueueRequestForObject{},util.ResourceGenerationOrFinalizerChangedPredicate{})
+	err = c.Watch(&source.Kind{Type: &terraformv1alpha1.Module{}}, &handler.EnqueueRequestForObject{}, util.ResourceGenerationOrFinalizerChangedPredicate{})
 	if err != nil {
 		return err
 	}
