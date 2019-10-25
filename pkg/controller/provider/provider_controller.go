@@ -7,7 +7,7 @@ import (
 
 	terraformv1alpha1 "github.com/krubot/terraform-operator/pkg/apis/terraform/v1alpha1"
 	terraform "github.com/krubot/terraform-operator/pkg/terraform"
-  util "github.com/krubot/terraform-operator/pkg/util"
+	util "github.com/krubot/terraform-operator/pkg/util"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -143,7 +143,7 @@ func listNamespaces(c client.Client) (corev1.NamespaceList, error) {
 	providerNamespaceList := corev1.NamespaceList{}
 	backendOpts := client.ListOptions{}
 
-  // This is a hack, sometimes we can return nothing so we need to cycle till we get something
+	// This is a hack, sometimes we can return nothing so we need to cycle till we get something
 	// Fill free to tell me what I'm doing wrong here!
 	for len(providerNamespaceList.Items) == 0 {
 		if err := c.List(context.Background(), &backendOpts, &providerNamespaceList); err != nil {

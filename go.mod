@@ -1,9 +1,7 @@
 module github.com/krubot/terraform-operator
 
 require (
-	github.com/go-openapi/spec v0.19.0
 	github.com/gogo/protobuf v1.3.1 // indirect
-	github.com/openshift-evangelists/crd-code-generation v0.0.0-20180227162415-5ae21b8b0582 // indirect
 	github.com/operator-framework/operator-sdk v0.10.0
 	github.com/spf13/pflag v1.0.3
 	go.uber.org/atomic v1.4.0 // indirect
