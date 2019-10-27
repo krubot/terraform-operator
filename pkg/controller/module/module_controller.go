@@ -83,6 +83,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 
 	// Fetch the Module instance
 	instance := &terraformv1alpha1.Module{}
+
 	err := r.client.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
