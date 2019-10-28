@@ -113,6 +113,16 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
+	err = terraform.TerraformNewWorkspace(instance.ObjectMeta.Namespace)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	err = terraform.TerraformSelectWorkspace(instance.ObjectMeta.Namespace)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
 	err = terraform.TerraformValidate(instance.ObjectMeta.Namespace)
 	if err != nil {
 		return reconcile.Result{}, err
