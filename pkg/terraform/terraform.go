@@ -84,6 +84,34 @@ func WriteToFile(b []byte, namespace string, name string) error {
 	return nil
 }
 
+func TerraformNewWorkspace(namespace string) error {
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+
+	cmd := exec.Command("terraform", "workspace", "new", namespace)
+	cmd.Dir = TFPATH + "/" + namespace
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	cmd.Run()
+
+	fmt.Println("terraform init output:\n" + out.String())
+	return nil
+}
+
+func TerraformSelectWorkspace(namespace string) error {
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+
+	cmd := exec.Command("terraform", "workspace", "select", namespace)
+	cmd.Dir = TFPATH + "/" + namespace
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	cmd.Run()
+
+	fmt.Println("terraform init output:\n" + out.String())
+	return nil
+}
+
 func TerraformInit(namespace string) error {
 	var out bytes.Buffer
 	var stderr bytes.Buffer
