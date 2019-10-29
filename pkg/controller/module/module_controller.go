@@ -10,10 +10,8 @@ import (
 	terraform "github.com/krubot/terraform-operator/pkg/terraform"
 	util "github.com/krubot/terraform-operator/pkg/util"
 
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -23,7 +21,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("controller_module")
+const controllerName = "controller_module"
+
+var log = logf.Log.WithName(controllerName)
 
 // Add creates a new Module Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -46,25 +46,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for changes to primary resource Module
 	err = c.Watch(&source.Kind{Type: &terraformv1alpha1.Module{}}, &handler.EnqueueRequestForObject{}, util.ResourceGenerationOrFinalizerChangedPredicate{})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to namespace resources
-	err = c.Watch(
-		&source.Kind{Type: &corev1.Namespace{}},
-		&handler.EnqueueRequestsFromMapFunc{
-			ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
-				return []reconcile.Request{
-					// Trigger a reconcile on the kubernetes provider update, please add more provider definitions as the api expands
-					{NamespacedName: types.NamespacedName{
-						Name:      "",
-						Namespace: a.Meta.GetNamespace(),
-					}},
-				}
-			}),
-		},
-		util.ResourceGenerationOrFinalizerChangedPredicate{})
 	if err != nil {
 		return err
 	}
@@ -119,23 +100,36 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 
 	time.Sleep(2 * time.Second)
 
-	providerNamespace := &corev1.Namespace{}
-
-	err = r.client.Get(context.Background(), request.NamespacedName, providerNamespace)
+	b, err := terraform.RenderModuleToTerraform(instance.Spec, instance.ObjectMeta.Name)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			// Request object not found, could have been deleted after reconcile request.
-			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
-			// Return and don't requeue
-			return reconcile.Result{}, nil
-		}
-		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
 
-	if util.IsBeingDeleted(providerNamespace) {
-		var out []byte
-		err = terraform.WriteToFile(out, instance.ObjectMeta.Namespace, instance.ObjectMeta.Name)
+	err = terraform.WriteToFile(b, instance.ObjectMeta.Namespace, instance.ObjectMeta.Name)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if !reflect.DeepEqual("Ready", instance.Status) {
+		// Add finalizer to the module resource
+		util.AddFinalizer(instance, controllerName)
+
+		// Set the data
+		instance.Status = "Ready"
+
+		// Update the CR
+		err := r.client.Status().Update(context.Background(), instance)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+
+	if util.IsBeingDeleted(instance) {
+		if !util.HasFinalizer(instance, controllerName) {
+			return reconcile.Result{}, nil
+		}
+
+		err = terraform.WriteToFile([]byte("{}"), instance.ObjectMeta.Namespace, instance.ObjectMeta.Name)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
@@ -170,17 +164,14 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 			return reconcile.Result{}, err
 		}
 
+		util.RemoveFinalizer(instance, controllerName)
+
+		err = r.client.Update(context.Background(), instance)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
 		return reconcile.Result{}, nil
-	}
-
-	b, err := terraform.RenderModuleToTerraform(instance.Spec, instance.ObjectMeta.Name)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	err = terraform.WriteToFile(b, instance.ObjectMeta.Namespace, instance.ObjectMeta.Name)
-	if err != nil {
-		return reconcile.Result{}, err
 	}
 
 	err = terraform.TerraformInit(instance.ObjectMeta.Namespace)
@@ -211,19 +202,6 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 	err = terraform.TerraformApply(instance.ObjectMeta.Namespace)
 	if err != nil {
 		return reconcile.Result{}, err
-	}
-
-	// Update CR with the AppStatus == Created
-	if !reflect.DeepEqual("Ready", instance.Status) {
-		// Set the data
-		instance.Status = "Ready"
-
-		// Update the CR
-		err = r.client.Status().Update(context.Background(), instance)
-		if err != nil {
-			reqLogger.Error(err, "Failed to update Project Status for the Provider")
-			return reconcile.Result{}, err
-		}
 	}
 
 	return reconcile.Result{}, nil
