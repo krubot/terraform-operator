@@ -33,13 +33,18 @@ spec:
         metadata:
           type: object
         spec:
+          description: ModuleSpec defines the desired state of Module
           properties:
+            namespace_name:
+              description: Kubernetes namespace name
+              type: string
             source:
               description: Kubernetes namespace module source
               type: string
           type: object
         status:
           type: string
+      type: object
   version: v1alpha1
   versions:
   - name: v1alpha1
