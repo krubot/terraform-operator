@@ -21,7 +21,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("controller_module")
+const controllerName = "controller_module"
+
+var log = logf.Log.WithName(controllerName)
 
 // Add creates a new Module Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -108,6 +110,70 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
+	if !reflect.DeepEqual("Ready", instance.Status) {
+		// Add finalizer to the module resource
+		util.AddFinalizer(instance, controllerName)
+
+		// Set the data
+		instance.Status = "Ready"
+
+		// Update the CR
+		err := r.client.Status().Update(context.Background(), instance)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+
+	if util.IsBeingDeleted(instance) {
+		if !util.HasFinalizer(instance, controllerName) {
+			return reconcile.Result{}, nil
+		}
+
+		err = terraform.WriteToFile([]byte("{}"), instance.ObjectMeta.Namespace, instance.ObjectMeta.Name)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		err = terraform.TerraformInit(instance.ObjectMeta.Namespace)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		err = terraform.TerraformNewWorkspace(instance.ObjectMeta.Namespace)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		err = terraform.TerraformSelectWorkspace(instance.ObjectMeta.Namespace)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		err = terraform.TerraformValidate(instance.ObjectMeta.Namespace)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		err = terraform.TerraformPlan(instance.ObjectMeta.Namespace)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		err = terraform.TerraformApply(instance.ObjectMeta.Namespace)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		util.RemoveFinalizer(instance, controllerName)
+
+		err = r.client.Update(context.Background(), instance)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		return reconcile.Result{}, nil
+	}
+
 	err = terraform.TerraformInit(instance.ObjectMeta.Namespace)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -136,19 +202,6 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 	err = terraform.TerraformApply(instance.ObjectMeta.Namespace)
 	if err != nil {
 		return reconcile.Result{}, err
-	}
-
-	// Update CR with the AppStatus == Created
-	if !reflect.DeepEqual("Ready", instance.Status) {
-		// Set the data
-		instance.Status = "Ready"
-
-		// Update the CR
-		err = r.client.Status().Update(context.Background(), instance)
-		if err != nil {
-			reqLogger.Error(err, "Failed to update Project Status for the Provider")
-			return reconcile.Result{}, err
-		}
 	}
 
 	return reconcile.Result{}, nil

@@ -14,7 +14,7 @@ spec:
     listKind: BackendList
     plural: backends
     singular: backend
-  scope: Cluster
+  scope: Namespaced
   subresources:
     status: {}
   validation:
@@ -33,12 +33,22 @@ spec:
         metadata:
           type: object
         spec:
+          description: BackendSpec defines the desired state of Backend
           properties:
+            cacert_path:
+              description: EtcdV3 backend cacert path
+              type: string
+            cert_path:
+              description: EtcdV3 backend cert path
+              type: string
             endpoints:
               description: EtcdV3 backend endpoints
               items:
                 type: string
               type: array
+            key_path:
+              description: EtcdV3 backend key path
+              type: string
             lock:
               description: EtcdV3 backend lock
               type: boolean
@@ -48,6 +58,7 @@ spec:
           type: object
         status:
           type: string
+      type: object
   version: v1alpha1
   versions:
   - name: v1alpha1

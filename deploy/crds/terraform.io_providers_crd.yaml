@@ -14,7 +14,7 @@ spec:
     listKind: ProviderList
     plural: providers
     singular: provider
-  scope: Cluster
+  scope: Namespaced
   subresources:
     status: {}
   validation:
@@ -33,6 +33,7 @@ spec:
         metadata:
           type: object
         spec:
+          description: ProviderSpec defines the desired state of Provider
           properties:
             host:
               description: Kubernetes provider hostname (in form of URI) of Kubernetes
@@ -48,6 +49,7 @@ spec:
           type: object
         status:
           type: string
+      type: object
   version: v1alpha1
   versions:
   - name: v1alpha1
