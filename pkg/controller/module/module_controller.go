@@ -114,12 +114,16 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		// Add finalizer to the module resource
 		util.AddFinalizer(instance, controllerName)
 
+		// Update the CR with finalizer
+		if err := r.client.Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+
 		// Set the data
 		instance.Status = "Ready"
 
-		// Update the CR
-		err := r.client.Status().Update(context.Background(), instance)
-		if err != nil {
+		// Update the CR with status ready
+		if err := r.client.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 	}
