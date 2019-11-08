@@ -5,4 +5,4 @@ metadata:
 spec:
   host: "https://192.168.56.101:6443"
   token: "${file(\"/var/run/secrets/kubernetes.io/serviceaccount/token\")}"
-  insecure: true
+  insecure: false
