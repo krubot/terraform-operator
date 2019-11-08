@@ -12,6 +12,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -98,7 +99,23 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
-	time.Sleep(2 * time.Second)
+	for {
+		backend := &terraformv1alpha1.Backend{}
+		r.client.Get(context.Background(), types.NamespacedName{Name: "etcdv3", Namespace: ""}, backend)
+
+		provider := &terraformv1alpha1.Provider{}
+		r.client.Get(context.Background(), types.NamespacedName{Name: "kubernetes", Namespace: ""}, provider)
+
+		if backend.Status == "Ready" && provider.Status == "Ready" {
+			break
+		}
+
+		// Log out that either backend or provider are not ready
+		reqLogger.Info("Either backend or provider are not ready yet")
+
+		// Wait before loop
+		time.Sleep(1 * time.Second)
+	}
 
 	b, err := terraform.RenderModuleToTerraform(instance.Spec, instance.ObjectMeta.Name)
 	if err != nil {
@@ -198,14 +215,47 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
+	if !reflect.DeepEqual("Validated", instance.Status) {
+
+		// Set the data
+		instance.Status = "Validated"
+
+		// Update the CR with status ready
+		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+
 	err = terraform.TerraformPlan(instance.ObjectMeta.Namespace)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
+	if !reflect.DeepEqual("Planned", instance.Status) {
+
+		// Set the data
+		instance.Status = "Planned"
+
+		// Update the CR with status ready
+		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+
 	err = terraform.TerraformApply(instance.ObjectMeta.Namespace)
 	if err != nil {
 		return reconcile.Result{}, err
+	}
+
+	if !reflect.DeepEqual("Applied", instance.Status) {
+
+		// Set the data
+		instance.Status = "Applied"
+
+		// Update the CR with status ready
+		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
 	}
 
 	return reconcile.Result{}, nil
