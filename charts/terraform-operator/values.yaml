@@ -8,5 +8,6 @@ image:
   pullPolicy: Always
 
 pspEnable: true
+monitoringEnable: true
 nameOverride: ""
 fullnameOverride: ""

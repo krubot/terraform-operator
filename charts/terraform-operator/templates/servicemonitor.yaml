@@ -1,0 +1,17 @@
+{{- if .Values.monitoringEnable }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: terraform-controller
+  labels:
+    app: {{ include "terraform.name" . }}
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "terraform.name" . }}
+      release: {{ .Release.Name }}
+  endpoints:
+  - port: 8383
+    path: "/metrics"
+{{- end }}
