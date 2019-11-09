@@ -11,7 +11,7 @@ metadata:
     flux.weave.works/automated: "false"
     flux.weave.works/tag.chart-image: glob:1.21.*
 spec:
-  releaseName: terraform
+  releaseName: terraform-operator
   chart:
     git: ssh://git@github.com/krubot/terraform-operator
     ref: master
