@@ -7,8 +7,8 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// BackendSpec defines the desired state of Backend
 // +kubebuilder:subresource:status
+// BackendSpec defines the desired state of Backend
 type BackendSpec struct {
 	// EtcdV3 backend endpoints
 	// +optional
@@ -30,18 +30,16 @@ type BackendSpec struct {
 	KeyPath string `json:"key_path,omitempty"`
 }
 
-// Backend is the Schema for the Backends API
-
 // +genclient
 // +genclient:nonNamespaced
 // +genclient:skipVerbs=updateStatus
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=backends
+// +kubebuilder:resource:path=backends,singular=backend,scope=Cluster,shortName=backend
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status",description="Description of the current status"
+// Backend is the Schema for the Backends API
 type Backend struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -51,7 +49,7 @@ type Backend struct {
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
+// +kubebuilder:object:root=true
 // BackendList contains a list of Backend
 type BackendList struct {
 	metav1.TypeMeta `json:",inline"`
