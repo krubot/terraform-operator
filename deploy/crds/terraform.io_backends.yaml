@@ -1,7 +1,12 @@
+
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: providers.terraform.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.2
+  creationTimestamp: null
+  name: backends.terraform.io
 spec:
   additionalPrinterColumns:
   - JSONPath: .status
@@ -10,15 +15,18 @@ spec:
     type: string
   group: terraform.io
   names:
-    kind: Provider
-    listKind: ProviderList
-    plural: providers
-    singular: provider
-  scope: Namespaced
+    kind: Backend
+    listKind: BackendList
+    plural: backends
+    shortNames:
+    - backend
+    singular: backend
+  scope: Cluster
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
+      description: Backend is the Schema for the Backends API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -33,18 +41,27 @@ spec:
         metadata:
           type: object
         spec:
-          description: ProviderSpec defines the desired state of Provider
+          description: BackendSpec defines the desired state of Backend
           properties:
-            host:
-              description: Kubernetes provider hostname (in form of URI) of Kubernetes
-                master
+            cacert_path:
+              description: EtcdV3 backend cacert path
               type: string
-            insecure:
-              description: Kubernetes provider whether server should be accessed without
-                verifying the TLS certificate
+            cert_path:
+              description: EtcdV3 backend cert path
+              type: string
+            endpoints:
+              description: EtcdV3 backend endpoints
+              items:
+                type: string
+              type: array
+            key_path:
+              description: EtcdV3 backend key path
+              type: string
+            lock:
+              description: EtcdV3 backend lock
               type: boolean
-            token:
-              description: Kubernetes provider token of your service account
+            prefix:
+              description: EtcdV3 backend prefix
               type: string
           type: object
         status:
@@ -55,3 +72,9 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
