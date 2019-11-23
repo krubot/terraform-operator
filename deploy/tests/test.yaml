@@ -1,7 +1,7 @@
 apiVersion: terraform.io/v1alpha1
 kind: Module
 metadata:
-  name: test-namespace
+  name: test
 spec:
   source: "/var/lib/modules/kubernetes/namespace/"
-  namespace_name: "test-namespace"
+  namespace_name: "test"

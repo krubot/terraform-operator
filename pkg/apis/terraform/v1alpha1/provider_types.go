@@ -28,7 +28,7 @@ type ProviderSpec struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=providers,singular=provider,scope=Cluster,shortName=provider
+// +kubebuilder:resource:path="providers",singular="provider",scope="Cluster",shortName="pro"
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status",description="Description of the current status"
 // Provider is the Schema for the providers API
 type Provider struct {

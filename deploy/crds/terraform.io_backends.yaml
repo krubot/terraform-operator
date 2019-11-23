@@ -19,7 +19,7 @@ spec:
     listKind: BackendList
     plural: backends
     shortNames:
-    - backend
+    - bac
     singular: backend
   scope: Cluster
   subresources:

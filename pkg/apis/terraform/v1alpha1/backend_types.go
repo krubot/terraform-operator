@@ -37,7 +37,7 @@ type BackendSpec struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=backends,singular=backend,scope=Cluster,shortName=backend
+// +kubebuilder:resource:path="backends",singular="backend",scope="Cluster",shortName="bac"
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status",description="Description of the current status"
 // Backend is the Schema for the Backends API
 type Backend struct {

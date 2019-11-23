@@ -24,7 +24,7 @@ type ModuleSpec struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=modules,singular=module,scope=Namespaced,shortName=module
+// +kubebuilder:resource:path="modules",singular="module",scope="Namespaced",shortName="mod"
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status",description="Description of the current status"
 // Module is the Schema for the modules API
 type Module struct {

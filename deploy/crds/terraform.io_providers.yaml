@@ -19,7 +19,7 @@ spec:
     listKind: ProviderList
     plural: providers
     shortNames:
-    - provider
+    - pro
     singular: provider
   scope: Cluster
   subresources:

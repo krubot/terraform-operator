@@ -19,7 +19,7 @@ spec:
     listKind: ModuleList
     plural: modules
     shortNames:
-    - module
+    - mod
     singular: module
   scope: Namespaced
   subresources:
