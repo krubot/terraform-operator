@@ -392,7 +392,7 @@ spec:
         - --update-chart-deps=true
         - --log-release-diffs=false
         - --tiller-namespace=kube-system
-        image: docker.io/fluxcd/helm-operator:1.0.0-rc3
+        image: docker.io/fluxcd/helm-operator:0.10.1
         imagePullPolicy: IfNotPresent
         name: flux-helm-operator
         ports:

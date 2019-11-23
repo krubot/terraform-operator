@@ -4,7 +4,7 @@ metadata:
   name: etcdv3
 spec:
   endpoints:
-    - "https://192.168.56.101:2379"
+    - "https://192.168.56.104:2379"
   lock: true
   prefix: "terraform-state/"
   cacert_path: "/etc/kubernetes/pki/etcd/ca.crt"
