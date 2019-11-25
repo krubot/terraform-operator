@@ -1,0 +1,26 @@
+{{- if .Values.monitoringEnable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "terraform.fullname" . }}
+  labels:
+    app: {{ include "terraform.name" . }}
+    chart: {{ include "terraform.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- with .Values.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  clusterIP: None
+  ports:
+    - name: terraform-operator-metrics
+      port: 8383
+      protocol: TCP
+      targetPort: 8383
+  selector:
+    app: {{ include "terraform.name" . }}
+    release: {{ .Release.Name }}
+  type: ClusterIP
+{{- end }}

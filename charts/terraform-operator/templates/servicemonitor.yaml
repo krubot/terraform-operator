@@ -12,6 +12,6 @@ spec:
       app: {{ include "terraform.name" . }}
       release: {{ .Release.Name }}
   endpoints:
-  - port: "8383"
-    path: "/metrics"
+  - honorLabels: true
+    port: terraform-operator-metrics
 {{- end }}
