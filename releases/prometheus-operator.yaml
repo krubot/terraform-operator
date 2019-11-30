@@ -11,8 +11,15 @@ metadata:
     flux.weave.works/automated: "false"
     flux.weave.works/tag.chart-image: glob:1.21.*
 spec:
-  releaseName: prometheus-operator
+  releaseName: metrics
   chart:
     git: ssh://git@github.com/krubot/terraform-operator
     ref: master
     path: charts/prometheus-operator
+  values:
+    kubeEtcd:
+      enabled: false
+    kubeProxy:
+      enabled: false
+    grafana:
+      adminPassword: admin
