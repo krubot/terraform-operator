@@ -45,8 +45,6 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "terraform-operator"
-            - name: TFPATH
-              value: "/srv"
           volumeMounts:
             - mountPath: {{ .Values.etcdDir }}
               name: etcd-certs
