@@ -6,13 +6,13 @@ generate:
 	operator-sdk generate k8s
 
 manifests: controller-gen
-	$(CONTROLLER_GEN) crd:trivialVersions=true paths="./..." output:crd:artifacts:config=deploy/crds
+	$(CONTROLLER_GEN) crd:trivialVersions=true paths=./pkg/apis/... output:artifacts:config=deploy/00-crds
 
 image:
 	operator-sdk build $(HUB)
 
 packages:
-	go get -u
+	go get -u ./...
 	go mod tidy
 	go mod vendor
 
