@@ -2,6 +2,7 @@ module github.com/krubot/terraform-operator
 
 require (
 	cloud.google.com/go v0.52.0 // indirect
+	github.com/Azure/go-autorest v13.3.2+incompatible // indirect
 	github.com/emicklei/go-restful v2.11.1+incompatible // indirect
 	github.com/go-openapi/jsonreference v0.19.3 // indirect
 	github.com/go-openapi/spec v0.19.5 // indirect
@@ -13,10 +14,12 @@ require (
 	github.com/gophercloud/gophercloud v0.7.0 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/hashicorp/terraform v0.12.20
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/mailru/easyjson v0.7.0 // indirect
-	github.com/operator-framework/operator-sdk v0.15.0
+	github.com/mitchellh/cli v1.0.0
+	github.com/operator-framework/operator-sdk v0.0.0-00010101000000-000000000000
 	github.com/prometheus/client_golang v1.3.0 // indirect
 	github.com/prometheus/common v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.5
