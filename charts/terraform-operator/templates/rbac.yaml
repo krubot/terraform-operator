@@ -1,8 +1,3 @@
-kind: ServiceAccount
-apiVersion: v1
-metadata:
-  name: terraform-operator
-
 ---
 
 kind: Role

@@ -1,13 +1,20 @@
 
 replicaCount: 1
 etcdDir: /etc/kubernetes/pki/etcd
+nameOverride: ""
+fullnameOverride: ""
 
 image:
   repository: quay.io/krubot/terraform-operator
   tag: latest
   pullPolicy: Always
 
+serviceAccount:
+  create: true
+  name: terraform-operator
+  gcpServiceAccount:
+    create: false
+
 pspEnable: true
 monitoringEnable: true
-nameOverride: ""
-fullnameOverride: ""
+etcdClusterEnable: true

@@ -1,0 +1,9 @@
+{{- if .Values.etcdClusterEnable }}
+apiVersion: "etcd.database.coreos.com/v1beta2"
+kind: "EtcdCluster"
+metadata:
+  name: "terraform-state"
+spec:
+  size: 3
+  version: "3.3.18"
+{{- end }}
