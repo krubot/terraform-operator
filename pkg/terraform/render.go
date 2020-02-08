@@ -1,9 +1,9 @@
 package terraform
 
 import (
-	"os"
 	"encoding/json"
 	"io/ioutil"
+	"os"
 )
 
 type Provider struct {
@@ -67,12 +67,17 @@ func RenderBackendToTerraform(instance interface{}, backendName string) ([]byte,
 }
 
 func WriteToFile(b []byte, namespace string, name string) error {
-	err := os.MkdirAll(os.Getwd+"/"+namespace, os.ModePerm)
+	currentDir, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(os.Getwd+"/"+namespace+"/"+name+".tf.json", b, 0755)
+	err = os.MkdirAll(currentDir+"/"+namespace, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(currentDir+"/"+namespace+"/"+name+".tf.json", b, 0755)
 	if err != nil {
 		return err
 	}

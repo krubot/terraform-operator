@@ -11,10 +11,10 @@ require (
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/googleapis/gnostic v0.4.0 // indirect
-	github.com/gophercloud/gophercloud v0.7.0 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/terraform v0.12.20
+	github.com/hashicorp/terraform-svchost v0.0.0-20191011084731-65d371908596
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/mailru/easyjson v0.7.0 // indirect
@@ -23,6 +23,7 @@ require (
 	github.com/prometheus/client_golang v1.3.0 // indirect
 	github.com/prometheus/common v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.5
+	github.com/terraform-providers/terraform-provider-openstack v1.18.0
 	go.uber.org/atomic v1.5.1 // indirect
 	go.uber.org/multierr v1.4.0 // indirect
 	go.uber.org/zap v1.13.0 // indirect
@@ -58,5 +59,7 @@ replace (
 )
 
 replace github.com/operator-framework/operator-sdk => github.com/operator-framework/operator-sdk v0.10.0
+
+replace github.com/ugorji/go/codec => github.com/ugorji/go v1.1.4
 
 go 1.13

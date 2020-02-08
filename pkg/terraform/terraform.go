@@ -1,122 +1,232 @@
 package terraform
 
 import (
-	"bytes"
-	"fmt"
 	"os"
-	"os/exec"
+	"fmt"
+	"log"
+	"path/filepath"
+	"runtime"
+	"errors"
 
 	"github.com/mitchellh/cli"
+	"github.com/hashicorp/terraform-svchost/auth"
+	"github.com/hashicorp/terraform-svchost/disco"
 	"github.com/hashicorp/terraform/command"
+	"github.com/hashicorp/terraform/command/cliconfig"
+	"github.com/hashicorp/terraform/httpclient"
+	"github.com/hashicorp/terraform/version"
+
 	backendInit "github.com/hashicorp/terraform/backend/init"
+	pluginDiscovery "github.com/hashicorp/terraform/plugin/discovery"
 )
 
+func credentialsSource(config *cliconfig.Config) (auth.CredentialsSource, error) {
+	helperPlugins := pluginDiscovery.FindPlugins("credentials", globalPluginDirs())
+	return config.CredentialsSource(helperPlugins)
+}
+
+func globalPluginDirs() []string {
+	var ret []string
+	// Look in ~/.terraform.d/plugins/ , or its equivalent on non-UNIX
+	dir, err := cliconfig.ConfigDir()
+	if err != nil {
+		log.Printf("[ERROR] Error finding global config directory: %s", err)
+	} else {
+		machineDir := fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)
+		ret = append(ret, filepath.Join(dir, "plugins"))
+		ret = append(ret, filepath.Join(dir, "plugins", machineDir))
+	}
+	return ret
+}
+
 func TerraformNewWorkspace(namespace string) error {
-	var out bytes.Buffer
-	var stderr bytes.Buffer
+	config, _ := cliconfig.LoadConfig()
+	credsSrc, err := credentialsSource(config)
+	if err != nil {
+		log.Printf("[WARN] Cannot initialize remote host credentials manager: %s", err)
+	}
 
-	cmd := exec.Command("terraform", "workspace", "new", namespace)
-	cmd.Dir = os.Getwd + "/" + namespace
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	cmd.Run()
+	services := disco.NewWithCredentialsSource(credsSrc)
+	services.SetUserAgent(httpclient.TerraformUserAgent(version.String()))
 
-	fmt.Println("terraform init output:\n" + out.String())
+	backendInit.Init(services)
+
+	initCmd := &command.WorkspaceNewCommand{
+		Meta: command.Meta{
+			Color:               false,
+			RunningInAutomation: true,
+			PluginCacheDir:      config.PluginCacheDir,
+			Ui: &cli.BasicUi{
+				Reader:      os.Stdin,
+				Writer:      os.Stdout,
+				ErrorWriter: os.Stderr,
+			},
+		},
+	}
+
+	exitCode := initCmd.Run([]string{namespace, namespace})
+	log.Printf("TerraformNewWorkspace exit code:", exitCode)
 	return nil
 }
 
 func TerraformSelectWorkspace(namespace string) error {
-	var out bytes.Buffer
-	var stderr bytes.Buffer
+	config, _ := cliconfig.LoadConfig()
+	credsSrc, err := credentialsSource(config)
+	if err != nil {
+		log.Printf("[WARN] Cannot initialize remote host credentials manager: %s", err)
+	}
 
-	cmd := exec.Command("terraform", "workspace", "select", namespace)
-	cmd.Dir = os.Getwd + "/" + namespace
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	cmd.Run()
+	services := disco.NewWithCredentialsSource(credsSrc)
+	services.SetUserAgent(httpclient.TerraformUserAgent(version.String()))
 
-	fmt.Println("terraform init output:\n" + out.String())
+	backendInit.Init(services)
+
+	initCmd := &command.WorkspaceSelectCommand{
+		Meta: command.Meta{
+			Color:               false,
+			RunningInAutomation: true,
+			PluginCacheDir:      config.PluginCacheDir,
+			Ui: &cli.BasicUi{
+				Reader:      os.Stdin,
+				Writer:      os.Stdout,
+				ErrorWriter: os.Stderr,
+			},
+		},
+	}
+
+	exitCode := initCmd.Run([]string{namespace, namespace})
+	log.Printf("TerraformSelectWorkspace exit code:", exitCode)
 	return nil
 }
 
 func TerraformInit(namespace string) error {
-	backendInit.Init(nil)
-
-  ui := &cli.BasicUi{
-		Reader:      os.Stdin,
-		Writer:      os.Stdout,
-		ErrorWriter: os.Stderr,
-  }
-
-  initCmd := &command.InitCommand{
-  	Meta: command.Meta{
-  		Ui: ui,
-  	},
-  }
-
-	exitStatus, err := initCmd.Run()
+	config, _ := cliconfig.LoadConfig()
+	credsSrc, err := credentialsSource(config)
 	if err != nil {
-		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-		return err
+		log.Printf("[WARN] Cannot initialize remote host credentials manager: %s", err)
 	}
 
-	fmt.Println("terraform init output:\n" + out.String())
+	services := disco.NewWithCredentialsSource(credsSrc)
+	services.SetUserAgent(httpclient.TerraformUserAgent(version.String()))
+
+	backendInit.Init(services)
+
+	initCmd := &command.InitCommand{
+		Meta: command.Meta{
+			Color:               false,
+			RunningInAutomation: true,
+			PluginCacheDir:      config.PluginCacheDir,
+			Ui: &cli.BasicUi{
+				Reader:      os.Stdin,
+				Writer:      os.Stdout,
+				ErrorWriter: os.Stderr,
+			},
+		},
+	}
+
+	exitCode := initCmd.Run([]string{namespace})
+	log.Printf("TerraformInit exit code:", exitCode)
+	if exitCode != 0 {
+		return errors.New("Terraform init returned a none zero exit code")
+	}
 	return nil
 }
 
 func TerraformValidate(namespace string) error {
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-
-	cmd := exec.Command("terraform", "validate")
-	cmd.Dir = os.Getwd + "/" + namespace
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-
+	config, _ := cliconfig.LoadConfig()
+	credsSrc, err := credentialsSource(config)
 	if err != nil {
-		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-		return err
+		log.Printf("[WARN] Cannot initialize remote host credentials manager: %s", err)
 	}
 
-	fmt.Println("terraform validate output:\n" + out.String())
+	services := disco.NewWithCredentialsSource(credsSrc)
+	services.SetUserAgent(httpclient.TerraformUserAgent(version.String()))
+
+	backendInit.Init(services)
+
+	initCmd := &command.ValidateCommand{
+		Meta: command.Meta{
+			Color:               false,
+			RunningInAutomation: true,
+			PluginCacheDir:      config.PluginCacheDir,
+			Ui: &cli.BasicUi{
+				Reader:      os.Stdin,
+				Writer:      os.Stdout,
+				ErrorWriter: os.Stderr,
+			},
+		},
+	}
+
+	exitCode := initCmd.Run([]string{namespace})
+	log.Printf("TerraformValidate exit code:", exitCode)
+	if exitCode != 0 {
+		return errors.New("Terraform validate returned a none zero exit code")
+	}
 	return nil
 }
 
 func TerraformPlan(namespace string) error {
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-
-	cmd := exec.Command("terraform", "plan")
-	cmd.Dir = os.Getwd + "/" + namespace
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-
+	config, _ := cliconfig.LoadConfig()
+	credsSrc, err := credentialsSource(config)
 	if err != nil {
-		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-		return err
+		log.Printf("[WARN] Cannot initialize remote host credentials manager: %s", err)
 	}
 
-	fmt.Println("terraform plan output:\n" + out.String())
+	services := disco.NewWithCredentialsSource(credsSrc)
+	services.SetUserAgent(httpclient.TerraformUserAgent(version.String()))
+
+	backendInit.Init(services)
+
+	initCmd := &command.PlanCommand{
+		Meta: command.Meta{
+			Color:               false,
+			RunningInAutomation: true,
+			PluginCacheDir:      config.PluginCacheDir,
+			Ui: &cli.BasicUi{
+				Reader:      os.Stdin,
+				Writer:      os.Stdout,
+				ErrorWriter: os.Stderr,
+			},
+		},
+	}
+
+	exitCode := initCmd.Run([]string{namespace})
+	log.Printf("TerraformPlan exit code:", exitCode)
+	if exitCode != 0 {
+		return errors.New("Terraform plane returned a none zero exit code")
+	}
 	return nil
 }
 
 func TerraformApply(namespace string) error {
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-
-	cmd := exec.Command("terraform", "apply", "-auto-approve")
-	cmd.Dir = os.Getwd + "/" + namespace
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-
+	config, _ := cliconfig.LoadConfig()
+	credsSrc, err := credentialsSource(config)
 	if err != nil {
-		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-		return err
+		log.Printf("[WARN] Cannot initialize remote host credentials manager: %s", err)
 	}
 
-	fmt.Println("terraform apply output:\n" + out.String())
+	services := disco.NewWithCredentialsSource(credsSrc)
+	services.SetUserAgent(httpclient.TerraformUserAgent(version.String()))
+
+	backendInit.Init(services)
+
+	initCmd := &command.ApplyCommand{
+		Meta: command.Meta{
+			Color:               false,
+			RunningInAutomation: true,
+			PluginCacheDir:      config.PluginCacheDir,
+			Ui: &cli.BasicUi{
+				Reader:      os.Stdin,
+				Writer:      os.Stdout,
+				ErrorWriter: os.Stderr,
+			},
+		},
+	}
+
+	exitCode := initCmd.Run([]string{"-auto-approve", namespace})
+	log.Printf("TerraformApply exit code:", exitCode)
+	if exitCode != 0 {
+		return errors.New("Terraform apply returned a none zero exit code")
+	}
 	return nil
 }
