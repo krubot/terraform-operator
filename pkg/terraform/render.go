@@ -83,3 +83,16 @@ func WriteToFile(b []byte, namespace string, name string) error {
 	}
 	return nil
 }
+
+func RemoveFile(namespace string, name string) error {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(currentDir + "/" + namespace + "/" + name + ".tf.json")
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -10,6 +10,10 @@ manifests: controller-gen
 
 image:
 	operator-sdk build $(HUB)
+	#CGO_ENABLED=0 GOOS=linux go build \
+	#  -o "${PWD}/terraform-operator/build/_output/bin/terraform-operator" \
+	#	${PWD}/cmd/manager
+	#docker build -f build/Dockerfile -t "$(HUB)" .
 
 packages:
 	go get -u ./...

@@ -1,20 +1,20 @@
 package terraform
 
 import (
-	"os"
+	"errors"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"runtime"
-	"errors"
 
-	"github.com/mitchellh/cli"
 	"github.com/hashicorp/terraform-svchost/auth"
 	"github.com/hashicorp/terraform-svchost/disco"
 	"github.com/hashicorp/terraform/command"
 	"github.com/hashicorp/terraform/command/cliconfig"
 	"github.com/hashicorp/terraform/httpclient"
 	"github.com/hashicorp/terraform/version"
+	"github.com/mitchellh/cli"
 
 	backendInit "github.com/hashicorp/terraform/backend/init"
 	pluginDiscovery "github.com/hashicorp/terraform/plugin/discovery"
