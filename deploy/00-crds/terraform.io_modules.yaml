@@ -9,9 +9,13 @@ metadata:
   name: modules.terraform.io
 spec:
   additionalPrinterColumns:
-  - JSONPath: .status
-    description: Description of the current status
-    name: Status
+  - JSONPath: .status.state
+    description: Description of the current state
+    name: State
+    type: string
+  - JSONPath: .status.phase
+    description: Description of the current phase
+    name: Phase
     type: string
   group: terraform.io
   names:
@@ -53,7 +57,20 @@ spec:
               type: string
           type: object
         status:
-          type: string
+          description: ModuleStatus defines the status of module
+          properties:
+            phase:
+              description: The current phase of the terraform workflow
+              type: string
+            state:
+              enum:
+              - '''Healthy'''
+              - '''Unhealthy'''
+              type: string
+          required:
+          - phase
+          - state
+          type: object
       type: object
   version: v1alpha1
   versions:

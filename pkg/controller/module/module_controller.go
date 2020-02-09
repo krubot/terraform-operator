@@ -127,7 +127,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
-	if !reflect.DeepEqual("Ready", instance.Status) {
+	if !reflect.DeepEqual("Healthy", instance.Status.State) {
 		// Add finalizer to the module resource
 		util.AddFinalizer(instance, controllerName)
 
@@ -137,7 +137,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		}
 
 		// Set the data
-		instance.Status = "Ready"
+		instance.Status.State = "Healthy"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
@@ -197,28 +197,65 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 
 	err = terraform.TerraformInit(instance.ObjectMeta.Namespace)
 	if err != nil {
-		return reconcile.Result{}, err
+		// Set the data
+		instance.Status.State = "Unhealthy"
+		instance.Status.Phase = "Init"
+
+		// Update the CR with status ready
+		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		return reconcile.Result{}, nil
 	}
 
 	err = terraform.TerraformNewWorkspace(instance.ObjectMeta.Namespace)
 	if err != nil {
-		return reconcile.Result{}, err
+		// Set the data
+		instance.Status.State = "Unhealthy"
+		instance.Status.Phase = "New Workspace"
+
+		// Update the CR with status ready
+		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		return reconcile.Result{}, nil
 	}
 
 	err = terraform.TerraformSelectWorkspace(instance.ObjectMeta.Namespace)
 	if err != nil {
-		return reconcile.Result{}, err
+		// Set the data
+		instance.Status.State = "Unhealthy"
+		instance.Status.Phase = "Select Workspace"
+
+		// Update the CR with status ready
+		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		return reconcile.Result{}, nil
 	}
 
 	err = terraform.TerraformValidate(instance.ObjectMeta.Namespace)
 	if err != nil {
-		return reconcile.Result{}, err
+		// Set the data
+		instance.Status.State = "Unhealthy"
+		instance.Status.Phase = "Validation"
+
+		// Update the CR with status ready
+		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		return reconcile.Result{}, nil
 	}
 
-	if !reflect.DeepEqual("Validated", instance.Status) {
+	if !reflect.DeepEqual("Validation", instance.Status.Phase) {
 
 		// Set the data
-		instance.Status = "Validated"
+		instance.Status.State = "Healthy"
+		instance.Status.Phase = "Validation"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
@@ -228,13 +265,23 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 
 	err = terraform.TerraformPlan(instance.ObjectMeta.Namespace)
 	if err != nil {
-		return reconcile.Result{}, err
+		// Set the data
+		instance.Status.State = "Unhealthy"
+		instance.Status.Phase = "Planned"
+
+		// Update the CR with status ready
+		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		return reconcile.Result{}, nil
 	}
 
-	if !reflect.DeepEqual("Planned", instance.Status) {
+	if !reflect.DeepEqual("Planned", instance.Status.Phase) {
 
 		// Set the data
-		instance.Status = "Planned"
+		instance.Status.State = "Healthy"
+		instance.Status.Phase = "Planned"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
@@ -244,13 +291,23 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 
 	err = terraform.TerraformApply(instance.ObjectMeta.Namespace)
 	if err != nil {
-		return reconcile.Result{}, err
+		// Set the data
+		instance.Status.State = "Unhealthy"
+		instance.Status.Phase = "Applied"
+
+		// Update the CR with status ready
+		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		return reconcile.Result{}, nil
 	}
 
-	if !reflect.DeepEqual("Applied", instance.Status) {
+	if !reflect.DeepEqual("Applied", instance.Status.Phase) {
 
 		// Set the data
-		instance.Status = "Applied"
+		instance.Status.State = "Healthy"
+		instance.Status.Phase = "Applied"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
