@@ -127,7 +127,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
-	if !reflect.DeepEqual("Healthy", instance.Status.State) {
+	if !reflect.DeepEqual("Success", instance.Status.State) {
 		// Add finalizer to the module resource
 		util.AddFinalizer(instance, controllerName)
 
@@ -137,8 +137,8 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		}
 
 		// Set the data
-		instance.Status.State = "Healthy"
-		instance.Status.Phase = "Write to file"
+		instance.Status.State = "Success"
+		instance.Status.Phase = "Output"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
@@ -199,11 +199,15 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 	err = terraform.TerraformInit(instance.ObjectMeta.Namespace)
 	if err != nil {
 		// Set the data
-		instance.Status.State = "Unhealthy"
+		instance.Status.State = "Failure"
 		instance.Status.Phase = "Init"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		if err := terraform.RemoveFile(instance.ObjectMeta.Namespace, instance.ObjectMeta.Name); err != nil {
 			return reconcile.Result{}, err
 		}
 
@@ -213,11 +217,15 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 	err = terraform.TerraformNewWorkspace(instance.ObjectMeta.Namespace)
 	if err != nil {
 		// Set the data
-		instance.Status.State = "Unhealthy"
-		instance.Status.Phase = "New Workspace"
+		instance.Status.State = "Failure"
+		instance.Status.Phase = "Workspace"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		if err := terraform.RemoveFile(instance.ObjectMeta.Namespace, instance.ObjectMeta.Name); err != nil {
 			return reconcile.Result{}, err
 		}
 
@@ -227,11 +235,15 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 	err = terraform.TerraformSelectWorkspace(instance.ObjectMeta.Namespace)
 	if err != nil {
 		// Set the data
-		instance.Status.State = "Unhealthy"
-		instance.Status.Phase = "Select Workspace"
+		instance.Status.State = "Failure"
+		instance.Status.Phase = "Workspace"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		if err := terraform.RemoveFile(instance.ObjectMeta.Namespace, instance.ObjectMeta.Name); err != nil {
 			return reconcile.Result{}, err
 		}
 
@@ -241,22 +253,26 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 	err = terraform.TerraformValidate(instance.ObjectMeta.Namespace)
 	if err != nil {
 		// Set the data
-		instance.Status.State = "Unhealthy"
-		instance.Status.Phase = "Validation"
+		instance.Status.State = "Failure"
+		instance.Status.Phase = "Validate"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 
+		if err := terraform.RemoveFile(instance.ObjectMeta.Namespace, instance.ObjectMeta.Name); err != nil {
+			return reconcile.Result{}, err
+		}
+
 		return reconcile.Result{}, nil
 	}
 
-	if !reflect.DeepEqual("Validation", instance.Status.Phase) {
+	if !reflect.DeepEqual("Validate", instance.Status.Phase) {
 
 		// Set the data
-		instance.Status.State = "Healthy"
-		instance.Status.Phase = "Validation"
+		instance.Status.State = "Success"
+		instance.Status.Phase = "Validate"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
@@ -267,22 +283,26 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 	err = terraform.TerraformPlan(instance.ObjectMeta.Namespace)
 	if err != nil {
 		// Set the data
-		instance.Status.State = "Unhealthy"
-		instance.Status.Phase = "Planned"
+		instance.Status.State = "Failure"
+		instance.Status.Phase = "Plan"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 
+		if err := terraform.RemoveFile(instance.ObjectMeta.Namespace, instance.ObjectMeta.Name); err != nil {
+			return reconcile.Result{}, err
+		}
+
 		return reconcile.Result{}, nil
 	}
 
-	if !reflect.DeepEqual("Planned", instance.Status.Phase) {
+	if !reflect.DeepEqual("Plan", instance.Status.Phase) {
 
 		// Set the data
-		instance.Status.State = "Healthy"
-		instance.Status.Phase = "Planned"
+		instance.Status.State = "Success"
+		instance.Status.Phase = "Plan"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
@@ -293,22 +313,26 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 	err = terraform.TerraformApply(instance.ObjectMeta.Namespace)
 	if err != nil {
 		// Set the data
-		instance.Status.State = "Unhealthy"
-		instance.Status.Phase = "Applied"
+		instance.Status.State = "Failure"
+		instance.Status.Phase = "Apply"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 
+		if err := terraform.RemoveFile(instance.ObjectMeta.Namespace, instance.ObjectMeta.Name); err != nil {
+			return reconcile.Result{}, err
+		}
+
 		return reconcile.Result{}, nil
 	}
 
-	if !reflect.DeepEqual("Applied", instance.Status.Phase) {
+	if !reflect.DeepEqual("Apply", instance.Status.Phase) {
 
 		// Set the data
-		instance.Status.State = "Healthy"
-		instance.Status.Phase = "Applied"
+		instance.Status.State = "Success"
+		instance.Status.Phase = "Apply"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {

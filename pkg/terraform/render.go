@@ -50,10 +50,6 @@ func RenderModuleToTerraform(instance interface{}, moduleName string) ([]byte, e
 	return b, nil
 }
 
-func DeleteModuleFromTerraform(moduleName string) (error) {
-	return nil
-}
-
 // RenderModuleToTerraform takes an object, and attempts to construct the appropriate terraform json from it.
 func RenderBackendToTerraform(instance interface{}, backendName string) ([]byte, error) {
 	r := Terraform{
@@ -82,6 +78,19 @@ func WriteToFile(b []byte, namespace string, name string) error {
 	}
 
 	err = ioutil.WriteFile(currentDir+"/"+namespace+"/"+name+".tf.json", b, 0755)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func RemoveFile(namespace string, name string) error {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(currentDir+"/"+namespace+"/"+name+".tf.json")
 	if err != nil {
 		return err
 	}

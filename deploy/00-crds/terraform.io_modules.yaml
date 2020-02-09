@@ -64,10 +64,11 @@ spec:
               type: string
             state:
               enum:
-              - Healthy
-              - Unhealthy
+              - Success
+              - Failure
               type: string
           required:
+          - phase
           - state
           type: object
       type: object
