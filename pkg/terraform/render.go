@@ -90,7 +90,7 @@ func RemoveFile(namespace string, name string) error {
 		return err
 	}
 
-	err = os.Remove(currentDir+"/"+namespace+"/"+name+".tf.json")
+	err = os.Remove(currentDir + "/" + namespace + "/" + name + ".tf.json")
 	if err != nil {
 		return err
 	}
