@@ -50,6 +50,10 @@ func RenderModuleToTerraform(instance interface{}, moduleName string) ([]byte, e
 	return b, nil
 }
 
+func DeleteModuleFromTerraform(moduleName string) (error) {
+	return nil
+}
+
 // RenderModuleToTerraform takes an object, and attempts to construct the appropriate terraform json from it.
 func RenderBackendToTerraform(instance interface{}, backendName string) ([]byte, error) {
 	r := Terraform{

@@ -138,6 +138,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 
 		// Set the data
 		instance.Status.State = "Healthy"
+		instance.Status.Phase = "Write to file"
 
 		// Update the CR with status ready
 		if err := r.client.Status().Update(context.Background(), instance); err != nil {

@@ -20,7 +20,7 @@ type ModuleSpec struct {
 // +kubebuilder:subresource:status
 // ModuleStatus defines the status of module
 type ModuleStatus struct {
-	// +kubebuilder:validation:Enum={'Healthy','Unhealthy'}
+	// +kubebuilder:validation:Enum={"Healthy","Unhealthy"}
 	State string `json:"state"`
 	// The current phase of the terraform workflow
 	Phase string `json:"phase"`
