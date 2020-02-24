@@ -1,4 +1,4 @@
 resources:
   - etcdv3.yaml
-  - test.yaml
-  - kubernetes.yaml
+  - google.yaml
+  - bucket.yaml

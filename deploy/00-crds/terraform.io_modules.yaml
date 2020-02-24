@@ -47,14 +47,21 @@ spec:
         spec:
           description: ModuleSpec defines the desired state of Module
           properties:
-            namespace_name:
-              description: Kubernetes namespace name
+            name:
+              description: GCP bucket name
+              type: string
+            project:
+              description: GCP bucket project
               type: string
             source:
               description: Kubernetes namespace module source
               enum:
-              - /var/lib/modules/kubernetes/namespace/
+              - /var/lib/modules/gcp/gcs/
               type: string
+          required:
+          - name
+          - project
+          - source
           type: object
         status:
           description: ModuleStatus defines the status of module

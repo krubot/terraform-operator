@@ -43,16 +43,22 @@ spec:
         spec:
           description: ProviderSpec defines the desired state of Provider
           properties:
-            host:
-              description: Kubernetes provider hostname (in form of URI) of Kubernetes
-                master
+            credentials:
+              description: Either the path to or the contents of a service account
+                key file in JSON format.
               type: string
-            insecure:
-              description: Kubernetes provider whether server should be accessed without
-                verifying the TLS certificate
-              type: boolean
-            token:
-              description: Kubernetes provider token of your service account
+            project:
+              description: The default project to manage resources in. If another
+                project is specified on a resource, it will take precedence.
+              type: string
+            region:
+              description: The default region to manage resources in. If another region
+                is specified on a regional resource, it will take precedence.
+              type: string
+            zone:
+              description: The default zone to manage resources in. Generally, this
+                zone should be within the default region you specified. If another
+                zone is specified on a zonal resource, it will take precedence.
               type: string
           type: object
         status:
