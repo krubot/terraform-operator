@@ -1,7 +1,6 @@
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# CREATE KUBERNETES NAMESPACE
-# These templates provision a new namespace in the Kubernetes cluster.
+# CREATE GCS BUCKET
+# These templates provision a new gcs bucket into google cloud platform.
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -22,21 +21,6 @@ terraform {
 
 resource "null_resource" "dependency_getter" {
   triggers = {
-    instance = join(",", var.namespace_dependencies)
-  }
-}
-
-# ---------------------------------------------------------------------------------------------------------------------
-# CREATE THE NAMESPACE
-# ---------------------------------------------------------------------------------------------------------------------
-
-resource "kubernetes_namespace" "namespace" {
-  count      = var.create_namespace ? 1 : 0
-  depends_on = [null_resource.dependency_getter]
-
-  metadata {
-    name        = var.namespace_name
-    labels      = var.namespace_labels
-    annotations = var.namespace_annotations
+    instance = join(",", var.gcs_dependencies)
   }
 }

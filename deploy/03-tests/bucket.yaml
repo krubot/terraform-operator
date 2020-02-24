@@ -1,0 +1,8 @@
+apiVersion: terraform.io/v1alpha1
+kind: Module
+metadata:
+  name: test
+spec:
+  source: "/var/lib/modules/gcp/gcs/"
+  name: "<bucket-name>"
+  project: "<project>"

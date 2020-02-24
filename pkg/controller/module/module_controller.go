@@ -104,7 +104,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		r.client.Get(context.Background(), types.NamespacedName{Name: "etcdv3", Namespace: ""}, backend)
 
 		provider := &terraformv1alpha1.Provider{}
-		r.client.Get(context.Background(), types.NamespacedName{Name: "kubernetes", Namespace: ""}, provider)
+		r.client.Get(context.Background(), types.NamespacedName{Name: "google", Namespace: ""}, provider)
 
 		if backend.Status == "Ready" && provider.Status == "Ready" {
 			break

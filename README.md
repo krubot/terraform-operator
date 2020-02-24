@@ -56,7 +56,7 @@ The using the gcloud cli you can generate the `terraform-operator` service accou
 ```sh
 $ gcloud --project=<project> iam service-accounts create terraform-operator --display-name "Terraform operator service account"
 $ gcloud --project=<project> iam service-accounts add-iam-policy-binding --role "roles/iam.workloadIdentityUser" --member "serviceAccount:<project>.svc.id.goog[infra/terraform-operator]" terraform-operator@<project>.iam.gserviceaccount.com
-$ gcloud projects add-iam-policy-binding <project> --member='serviceAccount:terraform-operator@<project>.iam.gserviceaccount.com' --role='roles/cloudsql.admin'
+$ gcloud projects add-iam-policy-binding <project> --member='serviceAccount:terraform-operator@<project>.iam.gserviceaccount.com' --role='roles/storage.admin'
 ```
 (`<project>` is the gcp project id)
 

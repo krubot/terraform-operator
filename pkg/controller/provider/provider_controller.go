@@ -159,7 +159,7 @@ func listNamespaces(c client.Client) (corev1.NamespaceList, error) {
 	// This is a hack, sometimes we can return nothing so we need to cycle till we get something
 	// Fill free to tell me what I'm doing wrong here!
 	for len(providerNamespaceList.Items) == 0 {
-		if err := c.List(context.Background(), &backendOpts, &providerNamespaceList); err != nil {
+		if err := c.List(context.Background(), &providerNamespaceList, &backendOpts); err != nil {
 			return providerNamespaceList, err
 		}
 	}

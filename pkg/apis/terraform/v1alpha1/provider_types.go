@@ -10,15 +10,18 @@ import (
 // +kubebuilder:subresource:status
 // ProviderSpec defines the desired state of Provider
 type ProviderSpec struct {
-	// Kubernetes provider hostname (in form of URI) of Kubernetes master
+	// Either the path to or the contents of a service account key file in JSON format.
 	// +optional
-	Host string `json:"host,omitempty"`
-	// Kubernetes provider token of your service account
+	Credentials string `json:"credentials,omitempty"`
+	// The default project to manage resources in. If another project is specified on a resource, it will take precedence.
 	// +optional
-	Token string `json:"token,omitempty"`
-	// Kubernetes provider whether server should be accessed without verifying the TLS certificate
+	Project string `json:"project,omitempty"`
+	// The default region to manage resources in. If another region is specified on a regional resource, it will take precedence.
 	// +optional
-	Insecure bool `json:"insecure,omitempty"`
+	Region string `json:"region,omitempty"`
+	// The default zone to manage resources in. Generally, this zone should be within the default region you specified. If another zone is specified on a zonal resource, it will take precedence.
+	// +optional
+	Zone string `json:"zone,omitempty"`
 }
 
 // +genclient

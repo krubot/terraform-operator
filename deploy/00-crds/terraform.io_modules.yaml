@@ -4,7 +4,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.2
+    controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
   name: modules.terraform.io
 spec:
@@ -35,26 +35,33 @@ spec:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
             of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
           type: string
         kind:
           description: 'Kind is a string value representing the REST resource this
             object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
           type: string
         metadata:
           type: object
         spec:
           description: ModuleSpec defines the desired state of Module
           properties:
-            namespace_name:
-              description: Kubernetes namespace name
+            name:
+              description: GCP bucket name
+              type: string
+            project:
+              description: GCP bucket project
               type: string
             source:
               description: Kubernetes namespace module source
               enum:
-              - /var/lib/modules/kubernetes/namespace/
+              - /var/lib/modules/gcp/gcs/
               type: string
+          required:
+          - name
+          - project
+          - source
           type: object
         status:
           description: ModuleStatus defines the status of module

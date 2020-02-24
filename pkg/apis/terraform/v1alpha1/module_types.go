@@ -11,10 +11,12 @@ import (
 // ModuleSpec defines the desired state of Module
 type ModuleSpec struct {
 	// Kubernetes namespace module source
-	// +kubebuilder:validation:Enum=/var/lib/modules/kubernetes/namespace/
-	Source string `json:"source,omitempty"`
-	// Kubernetes namespace name
-	NamespaceName string `json:"namespace_name,omitempty"`
+	// +kubebuilder:validation:Enum={"/var/lib/modules/gcp/gcs/"}
+	Source string `json:"source"`
+	// GCP bucket name
+	Name string `json:"name"`
+	// GCP bucket project
+	Project string `json:"project"`
 }
 
 // +kubebuilder:subresource:status

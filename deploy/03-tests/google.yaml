@@ -1,0 +1,6 @@
+apiVersion: terraform.io/v1alpha1
+kind: Provider
+metadata:
+  name: google
+spec:
+  project: "<project>"
