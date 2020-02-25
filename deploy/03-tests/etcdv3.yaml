@@ -1,7 +1,7 @@
-apiVersion: terraform.io/v1alpha1
-kind: Backend
+apiVersion: backend.terraform.io/v1alpha1
+kind: EtcdV3
 metadata:
-  name: etcdv3
+  name: state
 spec:
   endpoints:
     - "http://terraform-state:2379"

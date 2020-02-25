@@ -1,6 +1,6 @@
-apiVersion: terraform.io/v1alpha1
-kind: Provider
+apiVersion: provider.terraform.io/v1alpha1
+kind: GCP
 metadata:
-  name: google
+  name: cloud
 spec:
   project: "<project>"

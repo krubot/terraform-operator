@@ -6,31 +6,27 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: modules.terraform.io
+  name: gcp.provider.terraform.io
 spec:
   additionalPrinterColumns:
-  - JSONPath: .status.state
-    description: Description of the current state
-    name: State
+  - JSONPath: .status
+    description: Description of the current status
+    name: Status
     type: string
-  - JSONPath: .status.phase
-    description: Description of the current phase
-    name: Phase
-    type: string
-  group: terraform.io
+  group: provider.terraform.io
   names:
-    kind: Module
-    listKind: ModuleList
-    plural: modules
+    kind: GCP
+    listKind: GCPList
+    plural: gcp
     shortNames:
-    - mod
-    singular: module
-  scope: Namespaced
+    - pro
+    singular: gcp
+  scope: Cluster
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: Module is the Schema for the modules API
+      description: GCP is the Schema for the GCPs API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -45,39 +41,28 @@ spec:
         metadata:
           type: object
         spec:
-          description: ModuleSpec defines the desired state of Module
+          description: GCPSpec defines the desired state of GCP
           properties:
-            name:
-              description: GCP bucket name
+            credentials:
+              description: Either the path to or the contents of a service account
+                key file in JSON format.
               type: string
             project:
-              description: GCP bucket project
+              description: The default project to manage resources in. If another
+                project is specified on a resource, it will take precedence.
               type: string
-            source:
-              description: Kubernetes namespace module source
-              enum:
-              - /var/lib/modules/gcp/gcs/
+            region:
+              description: The default region to manage resources in. If another region
+                is specified on a regional resource, it will take precedence.
               type: string
-          required:
-          - name
-          - project
-          - source
+            zone:
+              description: The default zone to manage resources in. Generally, this
+                zone should be within the default region you specified. If another
+                zone is specified on a zonal resource, it will take precedence.
+              type: string
           type: object
         status:
-          description: ModuleStatus defines the status of module
-          properties:
-            phase:
-              description: The current phase of the terraform workflow
-              type: string
-            state:
-              enum:
-              - Success
-              - Failure
-              type: string
-          required:
-          - phase
-          - state
-          type: object
+          type: string
       type: object
   version: v1alpha1
   versions:

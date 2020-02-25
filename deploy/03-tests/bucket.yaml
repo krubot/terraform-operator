@@ -1,5 +1,5 @@
-apiVersion: terraform.io/v1alpha1
-kind: Module
+apiVersion: module.terraform.io/v1alpha1
+kind: GCS
 metadata:
   name: test
 spec:

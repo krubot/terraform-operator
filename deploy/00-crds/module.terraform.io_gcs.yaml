@@ -6,27 +6,31 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: providers.terraform.io
+  name: gcs.module.terraform.io
 spec:
   additionalPrinterColumns:
-  - JSONPath: .status
-    description: Description of the current status
-    name: Status
+  - JSONPath: .status.state
+    description: Description of the current state
+    name: State
     type: string
-  group: terraform.io
+  - JSONPath: .status.phase
+    description: Description of the current phase
+    name: Phase
+    type: string
+  group: module.terraform.io
   names:
-    kind: Provider
-    listKind: ProviderList
-    plural: providers
+    kind: GCS
+    listKind: GCSList
+    plural: gcs
     shortNames:
-    - pro
-    singular: provider
-  scope: Cluster
+    - mod
+    singular: gcs
+  scope: Namespaced
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: Provider is the Schema for the providers API
+      description: GCS is the Schema for the GCSs API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -41,28 +45,39 @@ spec:
         metadata:
           type: object
         spec:
-          description: ProviderSpec defines the desired state of Provider
+          description: GCSSpec defines the desired state of GCS
           properties:
-            credentials:
-              description: Either the path to or the contents of a service account
-                key file in JSON format.
+            name:
+              description: GCP bucket name
               type: string
             project:
-              description: The default project to manage resources in. If another
-                project is specified on a resource, it will take precedence.
+              description: GCP bucket project
               type: string
-            region:
-              description: The default region to manage resources in. If another region
-                is specified on a regional resource, it will take precedence.
+            source:
+              description: Kubernetes namespace GCS source
+              enum:
+              - /var/lib/modules/gcp/gcs/
               type: string
-            zone:
-              description: The default zone to manage resources in. Generally, this
-                zone should be within the default region you specified. If another
-                zone is specified on a zonal resource, it will take precedence.
-              type: string
+          required:
+          - name
+          - project
+          - source
           type: object
         status:
-          type: string
+          description: GCS status defines the status of GCS
+          properties:
+            phase:
+              description: The current phase of the terraform workflow
+              type: string
+            state:
+              enum:
+              - Success
+              - Failure
+              type: string
+          required:
+          - phase
+          - state
+          type: object
       type: object
   version: v1alpha1
   versions:

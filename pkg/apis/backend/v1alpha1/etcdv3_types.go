@@ -8,9 +8,9 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // +kubebuilder:subresource:status
-// BackendSpec defines the desired state of Backend
-type BackendSpec struct {
-	// EtcdV3 backend endpoints
+// Etcdv3Spec defines the desired state of Etcdv3
+type EtcdV3Spec struct {
+	// EtcdV3 Etcdv3 endpoints
 	// +optional
 	Endpoints []string `json:"endpoints,omitempty"`
 	// EtcdV3 backend lock
@@ -37,26 +37,26 @@ type BackendSpec struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path="backends",singular="backend",scope="Cluster",shortName="bac"
+// +kubebuilder:resource:path="etcdv3",singular="etcdv3",scope="Cluster",shortName="bac"
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status",description="Description of the current status"
-// Backend is the Schema for the Backends API
-type Backend struct {
+// Etcdv3 is the Schema for the Etcdv3s API
+type EtcdV3 struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   BackendSpec `json:"spec,omitempty"`
-	Status string      `json:"status,omitempty"`
+	Spec   EtcdV3Spec `json:"spec,omitempty"`
+	Status string     `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
-// BackendList contains a list of Backend
-type BackendList struct {
+// Etcdv3List contains a list of Etcdv3
+type EtcdV3List struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Backend `json:"items"`
+	Items           []EtcdV3 `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&Backend{}, &BackendList{})
+	SchemeBuilder.Register(&EtcdV3{}, &EtcdV3List{})
 }

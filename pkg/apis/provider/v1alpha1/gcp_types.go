@@ -8,8 +8,8 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // +kubebuilder:subresource:status
-// ProviderSpec defines the desired state of Provider
-type ProviderSpec struct {
+// GCPSpec defines the desired state of GCP
+type GCPSpec struct {
 	// Either the path to or the contents of a service account key file in JSON format.
 	// +optional
 	Credentials string `json:"credentials,omitempty"`
@@ -31,26 +31,26 @@ type ProviderSpec struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path="providers",singular="provider",scope="Cluster",shortName="pro"
+// +kubebuilder:resource:path="gcp",singular="gcp",scope="Cluster",shortName="pro"
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status",description="Description of the current status"
-// Provider is the Schema for the providers API
-type Provider struct {
+// GCP is the Schema for the GCPs API
+type GCP struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ProviderSpec `json:"spec,omitempty"`
-	Status string       `json:"status,omitempty"`
+	Spec   GCPSpec `json:"spec,omitempty"`
+	Status string  `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
-// ProviderList contains a list of Provider
-type ProviderList struct {
+// GCPList contains a list of GCP
+type GCPList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Provider `json:"items"`
+	Items           []GCP `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&Provider{}, &ProviderList{})
+	SchemeBuilder.Register(&GCP{}, &GCPList{})
 }

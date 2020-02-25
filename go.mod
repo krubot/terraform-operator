@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/Azure/go-autorest v13.4.0+incompatible
+	github.com/go-logr/logr v0.1.0
 	github.com/hashicorp/terraform v0.12.21
 	github.com/hashicorp/terraform-svchost v0.0.0-20191119180714-d2e4933b9136
 	github.com/mattn/go-isatty v0.0.9 // indirect
@@ -12,8 +13,10 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/terraform-providers/terraform-provider-openstack v1.23.0 // indirect
 	k8s.io/api v0.17.3
+	k8s.io/apiextensions-apiserver v0.17.2
 	k8s.io/apimachinery v0.17.3
 	k8s.io/client-go v12.0.0+incompatible
+	k8s.io/kube-aggregator v0.0.0
 	sigs.k8s.io/controller-runtime v0.5.0
 	sigs.k8s.io/controller-tools v0.2.5 // indirect
 )

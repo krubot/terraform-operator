@@ -6,27 +6,27 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: backends.terraform.io
+  name: etcdv3.backend.terraform.io
 spec:
   additionalPrinterColumns:
   - JSONPath: .status
     description: Description of the current status
     name: Status
     type: string
-  group: terraform.io
+  group: backend.terraform.io
   names:
-    kind: Backend
-    listKind: BackendList
-    plural: backends
+    kind: EtcdV3
+    listKind: EtcdV3List
+    plural: etcdv3
     shortNames:
     - bac
-    singular: backend
+    singular: etcdv3
   scope: Cluster
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: Backend is the Schema for the Backends API
+      description: Etcdv3 is the Schema for the Etcdv3s API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -41,7 +41,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: BackendSpec defines the desired state of Backend
+          description: Etcdv3Spec defines the desired state of Etcdv3
           properties:
             cacert_path:
               description: EtcdV3 backend cacert path
@@ -50,7 +50,7 @@ spec:
               description: EtcdV3 backend cert path
               type: string
             endpoints:
-              description: EtcdV3 backend endpoints
+              description: EtcdV3 Etcdv3 endpoints
               items:
                 type: string
               type: array

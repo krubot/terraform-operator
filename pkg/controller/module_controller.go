@@ -1,93 +1,44 @@
-package module
+package controllers
 
 import (
 	"context"
-	"os"
 	"reflect"
 	"time"
 
-	terraformv1alpha1 "github.com/krubot/terraform-operator/pkg/apis/terraform/v1alpha1"
-	terraform "github.com/krubot/terraform-operator/pkg/terraform"
-	util "github.com/krubot/terraform-operator/pkg/util"
-
+	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	backendv1alpha1 "github.com/krubot/terraform-operator/pkg/apis/backend/v1alpha1"
+	modulev1alpha1 "github.com/krubot/terraform-operator/pkg/apis/module/v1alpha1"
+	providerv1alpha1 "github.com/krubot/terraform-operator/pkg/apis/provider/v1alpha1"
+	terraform "github.com/krubot/terraform-operator/pkg/terraform"
+	util "github.com/krubot/terraform-operator/pkg/util"
 )
 
-const controllerName = "controller_module"
-
-var log = logf.Log.WithName(controllerName)
-
-// Add creates a new Module Controller and adds it to the Manager. The Manager will set fields on the Controller
-// and Start it when the Manager is Started.
-func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
-}
-
-// newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileModule{client: mgr.GetClient(), scheme: mgr.GetScheme()}
-}
-
-// add adds a new Controller to mgr with r as the reconcile.Reconciler
-func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	// Create a new controller
-	c, err := controller.New("module-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to primary resource Module
-	err = c.Watch(&source.Kind{Type: &terraformv1alpha1.Module{}}, &handler.EnqueueRequestForObject{}, util.ResourceGenerationOrFinalizerChangedPredicate{})
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Path of terraform workspace
-var TFPATH = os.Getenv("TFPATH")
-
-// Module structure to render the file
-type Module struct {
-	Module map[string]interface{} `json:"module"`
-}
-
-// blank assignment to verify that ReconcileModule implements reconcile.Reconciler
-var _ reconcile.Reconciler = &ReconcileModule{}
-
-// ReconcileModule reconciles a Module object
+// ReconcileProvider reconciles a Backend object
 type ReconcileModule struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
-	client client.Client
-	scheme *runtime.Scheme
+	client.Client
+	Log    logr.Logger
+	Scheme *runtime.Scheme
 }
 
-// Reconcile reads that state of the cluster for a Module object and makes changes based on the state read
-// and what is in the Module.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
-// a Pod as an example
-// Note:
-// The Controller will requeue the Request to be processed again if the returned error is non-nil or
-// Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Reconciling Module")
+// +kubebuilder:rbac:groups=batch.my.domain,resources=cronjobs,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=batch.my.domain,resources=cronjobs/status,verbs=get;update;patch
 
+func (r *ReconcileModule) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// Fetch the Module instance
-	instance := &terraformv1alpha1.Module{}
+	instance := &modulev1alpha1.GCS{}
 
-	err := r.client.Get(context.Background(), request.NamespacedName, instance)
+	err := r.Get(context.Background(), req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -100,18 +51,15 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 	}
 
 	for {
-		backend := &terraformv1alpha1.Backend{}
-		r.client.Get(context.Background(), types.NamespacedName{Name: "etcdv3", Namespace: ""}, backend)
+		backend := &backendv1alpha1.EtcdV3{}
+		r.Get(context.Background(), types.NamespacedName{Name: "state", Namespace: ""}, backend)
 
-		provider := &terraformv1alpha1.Provider{}
-		r.client.Get(context.Background(), types.NamespacedName{Name: "google", Namespace: ""}, provider)
+		provider := &providerv1alpha1.GCP{}
+		r.Get(context.Background(), types.NamespacedName{Name: "cloud", Namespace: ""}, provider)
 
 		if backend.Status == "Ready" && provider.Status == "Ready" {
 			break
 		}
-
-		// Log out that either backend or provider are not ready
-		reqLogger.Info("Either backend or provider are not ready yet")
 
 		// Wait before loop
 		time.Sleep(1 * time.Second)
@@ -129,10 +77,10 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 
 	if !reflect.DeepEqual("Success", instance.Status.State) {
 		// Add finalizer to the module resource
-		util.AddFinalizer(instance, controllerName)
+		util.AddFinalizer(instance, "controller_module")
 
 		// Update the CR with finalizer
-		if err := r.client.Update(context.Background(), instance); err != nil {
+		if err := r.Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 
@@ -141,13 +89,13 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		instance.Status.Phase = "Output"
 
 		// Update the CR with status ready
-		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+		if err := r.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 	}
 
 	if util.IsBeingDeleted(instance) {
-		if !util.HasFinalizer(instance, controllerName) {
+		if !util.HasFinalizer(instance, "controller_module") {
 			return reconcile.Result{}, nil
 		}
 
@@ -186,9 +134,9 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 			return reconcile.Result{}, err
 		}
 
-		util.RemoveFinalizer(instance, controllerName)
+		util.RemoveFinalizer(instance, "controller_module")
 
-		err = r.client.Update(context.Background(), instance)
+		err = r.Update(context.Background(), instance)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
@@ -203,7 +151,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		instance.Status.Phase = "Init"
 
 		// Update the CR with status ready
-		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+		if err := r.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 
@@ -221,7 +169,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		instance.Status.Phase = "Workspace"
 
 		// Update the CR with status ready
-		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+		if err := r.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 
@@ -239,7 +187,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		instance.Status.Phase = "Workspace"
 
 		// Update the CR with status ready
-		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+		if err := r.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 
@@ -257,7 +205,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		instance.Status.Phase = "Validate"
 
 		// Update the CR with status ready
-		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+		if err := r.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 
@@ -275,7 +223,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		instance.Status.Phase = "Validate"
 
 		// Update the CR with status ready
-		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+		if err := r.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 	}
@@ -287,7 +235,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		instance.Status.Phase = "Plan"
 
 		// Update the CR with status ready
-		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+		if err := r.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 
@@ -305,7 +253,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		instance.Status.Phase = "Plan"
 
 		// Update the CR with status ready
-		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+		if err := r.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 	}
@@ -317,7 +265,7 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		instance.Status.Phase = "Apply"
 
 		// Update the CR with status ready
-		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+		if err := r.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 
@@ -335,10 +283,19 @@ func (r *ReconcileModule) Reconcile(request reconcile.Request) (reconcile.Result
 		instance.Status.Phase = "Apply"
 
 		// Update the CR with status ready
-		if err := r.client.Status().Update(context.Background(), instance); err != nil {
+		if err := r.Status().Update(context.Background(), instance); err != nil {
 			return reconcile.Result{}, err
 		}
 	}
 
 	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileModule) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&modulev1alpha1.GCS{}).
+		Watches(&source.Kind{Type: &modulev1alpha1.GCS{}},
+			&handler.EnqueueRequestForObject{}).
+		WithEventFilter(util.ResourceGenerationOrFinalizerChangedPredicate{}).
+		Complete(r)
 }
