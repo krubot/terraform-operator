@@ -56,7 +56,7 @@ spec:
             source:
               description: Kubernetes namespace GCS source
               enum:
-              - /var/lib/modules/gcp/gcs/
+              - /opt/modules/gcp/gcs/
               type: string
           required:
           - name

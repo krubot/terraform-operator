@@ -27,6 +27,7 @@ import (
 	// +kubebuilder:scaffold:imports
 
 	"github.com/krubot/terraform-operator/pkg/controller"
+	"github.com/krubot/terraform-operator/pkg/version"
 
 	backendv1alpha1 "github.com/krubot/terraform-operator/pkg/apis/backend/v1alpha1"
 	modulev1alpha1 "github.com/krubot/terraform-operator/pkg/apis/module/v1alpha1"
@@ -61,6 +62,8 @@ func main() {
 	ctrl.SetLogger(zap.New(func(o *zap.Options) {
 		o.Development = true
 	}))
+
+	setupLog.Info("Version of terraform-operator: %v", version.Version)
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,

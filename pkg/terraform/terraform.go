@@ -65,7 +65,7 @@ func TerraformNewWorkspace(namespace string) error {
 	}
 
 	exitCode := initCmd.Run([]string{namespace, namespace})
-	log.Printf("TerraformNewWorkspace exit code:", exitCode)
+	log.Print("TerraformNewWorkspace exit code:", exitCode)
 	return nil
 }
 
@@ -95,7 +95,7 @@ func TerraformSelectWorkspace(namespace string) error {
 	}
 
 	exitCode := initCmd.Run([]string{namespace, namespace})
-	log.Printf("TerraformSelectWorkspace exit code:", exitCode)
+	log.Print("TerraformSelectWorkspace exit code:", exitCode)
 	return nil
 }
 
@@ -125,7 +125,7 @@ func TerraformInit(namespace string) error {
 	}
 
 	exitCode := initCmd.Run([]string{namespace})
-	log.Printf("TerraformInit exit code:", exitCode)
+	log.Print("TerraformInit exit code:", exitCode)
 	if exitCode != 0 {
 		return errors.New("Terraform init returned a none zero exit code")
 	}
@@ -158,7 +158,7 @@ func TerraformValidate(namespace string) error {
 	}
 
 	exitCode := initCmd.Run([]string{namespace})
-	log.Printf("TerraformValidate exit code:", exitCode)
+	log.Print("TerraformValidate exit code:", exitCode)
 	if exitCode != 0 {
 		return errors.New("Terraform validate returned a none zero exit code")
 	}
@@ -191,7 +191,7 @@ func TerraformPlan(namespace string) error {
 	}
 
 	exitCode := initCmd.Run([]string{namespace})
-	log.Printf("TerraformPlan exit code:", exitCode)
+	log.Print("TerraformPlan exit code:", exitCode)
 	if exitCode != 0 {
 		return errors.New("Terraform plane returned a none zero exit code")
 	}
@@ -224,7 +224,7 @@ func TerraformApply(namespace string) error {
 	}
 
 	exitCode := initCmd.Run([]string{"-auto-approve", namespace})
-	log.Printf("TerraformApply exit code:", exitCode)
+	log.Print("TerraformApply exit code:", exitCode)
 	if exitCode != 0 {
 		return errors.New("Terraform apply returned a none zero exit code")
 	}

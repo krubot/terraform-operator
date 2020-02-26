@@ -11,7 +11,7 @@ import (
 // GCSSpec defines the desired state of GCS
 type GCSSpec struct {
 	// Kubernetes namespace GCS source
-	// +kubebuilder:validation:Enum={"/var/lib/modules/gcp/gcs/"}
+	// +kubebuilder:validation:Enum={"/opt/modules/gcp/gcs/"}
 	Source string `json:"source"`
 	// GCP bucket name
 	Name string `json:"name"`
