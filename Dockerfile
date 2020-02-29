@@ -16,12 +16,22 @@ COPY pkg/ pkg/
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager cmd/manager/main.go
 
-# Use distroless as minimal base image to package the manager binary
-# Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
-WORKDIR /srv
+# Use a minimal redhat container so that we are also able to debug on the container
+FROM registry.access.redhat.com/ubi7/ubi-minimal:latest
+
+ENV USER_WORKDIR=/srv \
+    USER_UID=1000 \
+    GROUP_UID=1000
+
+RUN mkdir -p ${USER_WORKDIR} \
+    && chown ${USER_UID}:${GROUP_UID} ${USER_WORKDIR} \
+    && chmod 777 ${USER_WORKDIR}
+
+WORKDIR ${USER_WORKDIR}
+
 COPY --from=builder /workspace/manager .
 COPY modules /opt/modules
-USER nonroot:nonroot
 
-ENTRYPOINT ["/manager"]
+USER ${USER_UID}:${USER_UID}
+
+ENTRYPOINT ["/srv/manager"]

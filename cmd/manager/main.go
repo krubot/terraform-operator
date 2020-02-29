@@ -63,7 +63,7 @@ func main() {
 		o.Development = true
 	}))
 
-	setupLog.Info("Version of terraform-operator: %v", version.Version)
+	setupLog.Info("Version of terraform-operator", "version", version.Version)
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
@@ -91,6 +91,15 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Provider")
+		os.Exit(1)
+	}
+
+	if err = (&controllers.ReconcileModule{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("Module"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Module")
 		os.Exit(1)
 	}
 
