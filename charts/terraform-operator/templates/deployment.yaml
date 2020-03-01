@@ -28,10 +28,16 @@ spec:
         args:
         - --enable-leader-election
         imagePullPolicy: Always
-        resources:
-          limits:
-            cpu: 100m
-            memory: 30Mi
-          requests:
-            cpu: 100m
-            memory: 20Mi
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 9440
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 9440
+          initialDelaySeconds: 30
+          periodSeconds: 15
+      serviceAccountName: terraform-operator

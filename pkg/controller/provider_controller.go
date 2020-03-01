@@ -48,7 +48,7 @@ func (r *ReconcileProvider) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return reconcile.Result{}, err
 	}
 
-	b, err := terraform.RenderProviderToTerraform(instance.Spec, instance.ObjectMeta.Name)
+	b, err := terraform.RenderProviderToTerraform(instance.Spec, "google")
 	if err != nil {
 		return reconcile.Result{}, err
 	}

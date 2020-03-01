@@ -20,8 +20,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager 
 FROM registry.access.redhat.com/ubi7/ubi-minimal:latest
 
 ENV USER_WORKDIR=/srv \
-    USER_UID=1000 \
-    GROUP_UID=1000
+    USER_UID=0 \
+    GROUP_UID=0
 
 RUN mkdir -p ${USER_WORKDIR} \
     && chown ${USER_UID}:${GROUP_UID} ${USER_WORKDIR} \

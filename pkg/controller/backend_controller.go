@@ -48,7 +48,7 @@ func (r *ReconcileBackend) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return reconcile.Result{}, err
 	}
 
-	b, err := terraform.RenderBackendToTerraform(instance.Spec, instance.ObjectMeta.Name)
+	b, err := terraform.RenderBackendToTerraform(instance.Spec, "etcdv3")
 	if err != nil {
 		return reconcile.Result{}, err
 	}
