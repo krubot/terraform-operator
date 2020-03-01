@@ -61,8 +61,7 @@ func (r *ReconcileModule) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			break
 		}
 
-		// Wait before loop
-		time.Sleep(1 * time.Second)
+		time.Sleep(3 * time.Second)
 	}
 
 	b, err := terraform.RenderModuleToTerraform(instance.Spec, instance.ObjectMeta.Name)
@@ -162,9 +161,6 @@ func (r *ReconcileModule) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return reconcile.Result{}, nil
 	}
 
-	// Wait before loop
-	time.Sleep(1 * time.Second)
-
 	err = terraform.TerraformNewWorkspace(instance.ObjectMeta.Namespace)
 	if err != nil {
 		// Set the data
@@ -183,9 +179,6 @@ func (r *ReconcileModule) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return reconcile.Result{}, nil
 	}
 
-	// Wait before loop
-	time.Sleep(1 * time.Second)
-
 	err = terraform.TerraformSelectWorkspace(instance.ObjectMeta.Namespace)
 	if err != nil {
 		// Set the data
@@ -203,9 +196,6 @@ func (r *ReconcileModule) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		return reconcile.Result{}, nil
 	}
-
-	// Wait before loop
-	time.Sleep(1 * time.Second)
 
 	err = terraform.TerraformValidate(instance.ObjectMeta.Namespace)
 	if err != nil {
@@ -237,9 +227,6 @@ func (r *ReconcileModule) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 	}
 
-	// Wait before loop
-	time.Sleep(1 * time.Second)
-
 	err = terraform.TerraformPlan(instance.ObjectMeta.Namespace)
 	if err != nil {
 		// Set the data
@@ -269,9 +256,6 @@ func (r *ReconcileModule) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return reconcile.Result{}, err
 		}
 	}
-
-	// Wait before loop
-	time.Sleep(1 * time.Second)
 
 	err = terraform.TerraformApply(instance.ObjectMeta.Namespace)
 	if err != nil {

@@ -84,7 +84,6 @@ func main() {
 	}
 
 	mgr.AddHealthzCheck("Liveness", healthz.Ping)
-	mgr.AddReadyzCheck("Readiness", healthz.Ping)
 
 	setupLog.Info("controller reconcile")
 	if err = (&controllers.ReconcileBackend{
@@ -115,6 +114,8 @@ func main() {
 	}
 
 	// +kubebuilder:scaffold:builder
+
+	mgr.AddReadyzCheck("Readiness", healthz.Ping)
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {

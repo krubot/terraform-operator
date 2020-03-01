@@ -3,6 +3,6 @@ kind: GCS
 metadata:
   name: test
 spec:
-  source: "/opt/modules/gcp/gcs/"
+  source: "/var/lib/modules/gcp/gcs/"
   name: "<bucket-name>"
   project: "<project>"
