@@ -1,4 +1,4 @@
 resources:
-  - terraform.io_backends.yaml
-  - terraform.io_modules.yaml
-  - terraform.io_providers.yaml
+  - backend.terraform.io_etcdv3.yaml
+  - provider.terraform.io_gcp.yaml
+  - module.terraform.io_gcs.yaml

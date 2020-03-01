@@ -1,0 +1,77 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.5
+  creationTimestamp: null
+  name: gcp.provider.terraform.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status
+    description: Description of the current status
+    name: Status
+    type: string
+  group: provider.terraform.io
+  names:
+    kind: GCP
+    listKind: GCPList
+    plural: gcp
+    shortNames:
+    - pro
+    singular: gcp
+  scope: Cluster
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: GCP is the Schema for the GCPs API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: GCPSpec defines the desired state of GCP
+          properties:
+            credentials:
+              description: Either the path to or the contents of a service account
+                key file in JSON format.
+              type: string
+            project:
+              description: The default project to manage resources in. If another
+                project is specified on a resource, it will take precedence.
+              type: string
+            region:
+              description: The default region to manage resources in. If another region
+                is specified on a regional resource, it will take precedence.
+              type: string
+            zone:
+              description: The default zone to manage resources in. Generally, this
+                zone should be within the default region you specified. If another
+                zone is specified on a zonal resource, it will take precedence.
+              type: string
+          type: object
+        status:
+          type: string
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

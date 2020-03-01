@@ -1,28 +1,67 @@
-HUB=quay.io/krubot/terraform-operator
 
-.PHONY: all image generate
+# Image URL to use all building/pushing image targets
+IMG ?= quay.io/krubot/terraform-operator
+# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
+CRD_OPTIONS ?= "crd:trivialVersions=true"
 
-all: generate manifests image
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
 
-generate:
-	$(CONTROLLER_GEN) object paths=./pkg/apis/terraform/v1alpha1 output:dir=./pkg/apis/terraform/v1alpha1
+all: manager
 
+# Run tests
+test: generate fmt vet manifests
+	go test ./... -coverprofile cover.out
+
+# Build manager binary
+manager: generate fmt vet
+	go build -o bin/manager cmd/manager/main.go
+
+# Run against the configured Kubernetes cluster in ~/.kube/config
+run: generate fmt vet manifests
+	go run ./cmd/manager/main.go
+
+# Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
-	$(CONTROLLER_GEN) crd paths=./pkg/apis/... output:artifacts:config=deploy/00-crds
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) webhook paths="./..." output:artifacts:config=deploy/00-crds
 
-image:
-	CGO_ENABLED=0 GOOS=linux go build \
-	  -o "${PWD}/build/_output/bin/terraform-operator" \
-		${PWD}/cmd/manager
-	docker build -f build/Dockerfile -t "$(HUB)" .
-
+# Run go fmt against code
 fmt:
 	go fmt ./...
 
+# Run go vet against code
+vet:
+	go vet ./...
+
+# Generate code
+generate: controller-gen
+	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
+
+# Build the docker image
+docker-build: test
+	docker build . -t ${IMG}
+
+# Push the docker image
+docker-push:
+	docker push ${IMG}
+
+# find or download controller-gen
+# download controller-gen if necessary
 controller-gen:
-  ifeq (, $(shell which controller-gen))
-  go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
-  CONTROLLER_GEN=$(shell go env GOPATH)/bin/controller-gen
-  else
-  CONTROLLER_GEN=$(shell which controller-gen)
-  endif
+ifeq (, $(shell which controller-gen))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4 ;\
+	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif
