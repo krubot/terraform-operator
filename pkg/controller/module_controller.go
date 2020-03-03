@@ -58,9 +58,15 @@ func (r *ReconcileModule) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Get(context.Background(), types.NamespacedName{Name: "cloud", Namespace: ""}, provider)
 
 		if backend.Status == "Ready" && provider.Status == "Ready" {
+			for {
+				e := "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
+				h := map[string][]string{"Metadata-Flavor": {"Google"}}
+				if ret := checkURL(e, h, 200); ret == nil {
+					break
+				}
+			}
 			break
 		}
-
 		time.Sleep(3 * time.Second)
 	}
 
