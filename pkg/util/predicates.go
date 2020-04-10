@@ -1,8 +1,6 @@
 package util
 
 import (
-	"reflect"
-
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
@@ -12,12 +10,12 @@ import (
 var log = logf.Log.WithName("util")
 
 // ResourceGenerationOrFinalizerChangedPredicate this producates will fire an update event when the spec of a resource is changed (controller by ResourceGeneration), or when the finalizers are changed
-type ResourceGenerationOrFinalizerChangedPredicate struct {
+type ResourceGenerationChangedPredicate struct {
 	predicate.Funcs
 }
 
 // Update implements default UpdateEvent filter for validating resource version change
-func (ResourceGenerationOrFinalizerChangedPredicate) Update(e event.UpdateEvent) bool {
+func (ResourceGenerationChangedPredicate) Update(e event.UpdateEvent) bool {
 	if e.MetaOld == nil {
 		log.Error(nil, "UpdateEvent has no old metadata", "event", e)
 		return false
@@ -34,7 +32,7 @@ func (ResourceGenerationOrFinalizerChangedPredicate) Update(e event.UpdateEvent)
 		log.Error(nil, "UpdateEvent has no new metadata", "event", e)
 		return false
 	}
-	if e.MetaNew.GetGeneration() == e.MetaOld.GetGeneration() && reflect.DeepEqual(e.MetaNew.GetFinalizers(), e.MetaOld.GetFinalizers()) {
+	if e.MetaNew.GetGeneration() == e.MetaOld.GetGeneration() {
 		return false
 	}
 	return true

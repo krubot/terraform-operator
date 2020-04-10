@@ -6,20 +6,20 @@ import (
 	"os"
 )
 
-type Provider struct {
-	Provider map[string]interface{} `json:"provider"`
-}
-
-type Module struct {
-	Module map[string]interface{} `json:"module"`
-}
-
 type Terraform struct {
 	Terraform Backend `json:"terraform"`
 }
 
 type Backend struct {
 	Backend map[string]interface{} `json:"backend"`
+}
+
+type Provider struct {
+	Provider map[string]interface{} `json:"provider"`
+}
+
+type Module struct {
+	Module map[string]interface{} `json:"module"`
 }
 
 // RenderProviderToTerraform takes an object, and attempts to construct the appropriate terraform json from it.

@@ -6,3 +6,10 @@ spec:
   source: "/opt/modules/gcp/gcs/"
   name: "<bucket-name>"
   project: "<project>"
+dep:
+  - kind: Provider
+    name: cloud
+    type: Google
+  - kind: Backend
+    name: state
+    type: EtcdV3

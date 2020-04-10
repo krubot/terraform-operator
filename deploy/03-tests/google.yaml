@@ -1,5 +1,5 @@
 apiVersion: provider.terraform.io/v1alpha1
-kind: GCP
+kind: Google
 metadata:
   name: cloud
 spec:

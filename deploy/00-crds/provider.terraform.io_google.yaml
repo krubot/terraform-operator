@@ -6,33 +6,64 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: gcp.provider.terraform.io
+  name: google.provider.terraform.io
 spec:
   additionalPrinterColumns:
-  - JSONPath: .status
-    description: Description of the current status
-    name: Status
+  - JSONPath: .status.state
+    description: Description of the current state
+    name: State
+    type: string
+  - JSONPath: .status.phase
+    description: Description of the current phase
+    name: Phase
     type: string
   group: provider.terraform.io
   names:
-    kind: GCP
-    listKind: GCPList
-    plural: gcp
+    kind: Google
+    listKind: GoogleList
+    plural: google
     shortNames:
     - pro
-    singular: gcp
-  scope: Cluster
+    singular: google
+  scope: Namespaced
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: GCP is the Schema for the GCPs API
+      description: Google is the Schema for the Googles API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
             of an object. Servers should convert recognized schemas to the latest
             internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
           type: string
+        dep:
+          items:
+            description: DepSpec defines the dependency list of Google
+            properties:
+              kind:
+                description: Dependency kind
+                enum:
+                - Backend
+                - Module
+                - Provider
+                type: string
+              name:
+                description: Dependency name
+                type: string
+              type:
+                description: Dependency type
+                enum:
+                - EtcdV3
+                - GCS
+                - Google
+                type: string
+            required:
+            - kind
+            - name
+            - type
+            type: object
+          type: array
         kind:
           description: 'Kind is a string value representing the REST resource this
             object represents. Servers may infer this from the endpoint the client
@@ -41,7 +72,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: GCPSpec defines the desired state of GCP
+          description: GoogleSpec defines the desired state of Google
           properties:
             credentials:
               description: Either the path to or the contents of a service account
@@ -62,7 +93,20 @@ spec:
               type: string
           type: object
         status:
-          type: string
+          description: Google status defines the status of Google
+          properties:
+            phase:
+              description: The current phase of the terraform workflow
+              type: string
+            state:
+              enum:
+              - Success
+              - Failure
+              type: string
+          required:
+          - phase
+          - state
+          type: object
       type: object
   version: v1alpha1
   versions:
