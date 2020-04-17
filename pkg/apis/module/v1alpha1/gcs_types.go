@@ -28,6 +28,19 @@ type GCSStatus struct {
 	Phase string `json:"phase"`
 }
 
+// +kubebuilder:subresource:status
+// DepSpec defines the dependency list of GCS
+type DepSpec struct {
+	// Dependency kind
+	// +kubebuilder:validation:Enum={"Backend","Module","Provider"}
+	Kind string `json:"kind"`
+	// Dependency name
+	Name string `json:"name"`
+	// Dependency type
+	// +kubebuilder:validation:Enum={"EtcdV3","GCS","Google"}
+	Type string `json:"type"`
+}
+
 // +genclient
 // +genclient:Namespaced
 // +genclient:skipVerbs=updateStatus
@@ -44,6 +57,7 @@ type GCS struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   GCSSpec   `json:"spec,omitempty"`
+	Dep    []DepSpec `json:"dep,omitempty"`
 	Status GCSStatus `json:"status,omitempty"`
 }
 

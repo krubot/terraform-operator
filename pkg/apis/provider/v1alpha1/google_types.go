@@ -8,8 +8,8 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // +kubebuilder:subresource:status
-// GCPSpec defines the desired state of GCP
-type GCPSpec struct {
+// GoogleSpec defines the desired state of Google
+type GoogleSpec struct {
 	// Either the path to or the contents of a service account key file in JSON format.
 	// +optional
 	Credentials string `json:"credentials,omitempty"`
@@ -24,6 +24,28 @@ type GCPSpec struct {
 	Zone string `json:"zone,omitempty"`
 }
 
+// +kubebuilder:subresource:status
+// Google status defines the status of Google
+type GoogleStatus struct {
+	// +kubebuilder:validation:Enum={"Success","Failure"}
+	State string `json:"state"`
+	// The current phase of the terraform workflow
+	Phase string `json:"phase"`
+}
+
+// +kubebuilder:subresource:status
+// DepSpec defines the dependency list of Google
+type DepSpec struct {
+	// Dependency kind
+	// +kubebuilder:validation:Enum={"Backend","Module","Provider"}
+	Kind string `json:"kind"`
+	// Dependency name
+	Name string `json:"name"`
+	// Dependency type
+	// +kubebuilder:validation:Enum={"EtcdV3","GCS","Google"}
+	Type string `json:"type"`
+}
+
 // +genclient
 // +genclient:nonNamespaced
 // +genclient:skipVerbs=updateStatus
@@ -31,26 +53,28 @@ type GCPSpec struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path="gcp",singular="gcp",scope="Cluster",shortName="pro"
-// +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status",description="Description of the current status"
-// GCP is the Schema for the GCPs API
-type GCP struct {
+// +kubebuilder:resource:path="google",singular="google",scope="Namespaced",shortName="pro"
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.state",description="Description of the current state"
+// +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase",description="Description of the current phase"
+// Google is the Schema for the Googles API
+type Google struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   GCPSpec `json:"spec,omitempty"`
-	Status string  `json:"status,omitempty"`
+	Spec   GoogleSpec   `json:"spec,omitempty"`
+	Dep    []DepSpec    `json:"dep,omitempty"`
+	Status GoogleStatus `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
-// GCPList contains a list of GCP
-type GCPList struct {
+// GoogleList contains a list of Google
+type GoogleList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []GCP `json:"items"`
+	Items           []Google `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&GCP{}, &GCPList{})
+	SchemeBuilder.Register(&Google{}, &GoogleList{})
 }

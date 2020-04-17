@@ -7,3 +7,7 @@ spec:
     - "http://terraform-state:2379"
   lock: true
   prefix: "terraform-state/"
+dep:
+  - kind: Provider
+    name: cloud
+    type: Google

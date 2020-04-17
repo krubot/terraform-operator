@@ -1,4 +1,4 @@
 resources:
   - backend.terraform.io_etcdv3.yaml
-  - provider.terraform.io_gcp.yaml
+  - provider.terraform.io_google.yaml
   - module.terraform.io_gcs.yaml

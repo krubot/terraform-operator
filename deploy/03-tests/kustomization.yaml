@@ -1,4 +1,5 @@
 resources:
   - etcdv3.yaml
   - google.yaml
-  - bucket.yaml
+  - bucket1.yaml
+  - bucket2.yaml

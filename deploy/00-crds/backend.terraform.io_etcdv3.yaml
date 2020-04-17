@@ -9,9 +9,13 @@ metadata:
   name: etcdv3.backend.terraform.io
 spec:
   additionalPrinterColumns:
-  - JSONPath: .status
-    description: Description of the current status
-    name: Status
+  - JSONPath: .status.state
+    description: Description of the current state
+    name: State
+    type: string
+  - JSONPath: .status.phase
+    description: Description of the current phase
+    name: Phase
     type: string
   group: backend.terraform.io
   names:
@@ -21,7 +25,7 @@ spec:
     shortNames:
     - bac
     singular: etcdv3
-  scope: Cluster
+  scope: Namespaced
   subresources:
     status: {}
   validation:
@@ -33,6 +37,33 @@ spec:
             of an object. Servers should convert recognized schemas to the latest
             internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
           type: string
+        dep:
+          items:
+            description: DepSpec defines the dependency list of EtcdV3
+            properties:
+              kind:
+                description: Dependency kind
+                enum:
+                - Backend
+                - Module
+                - Provider
+                type: string
+              name:
+                description: Dependency name
+                type: string
+              type:
+                description: Dependency type
+                enum:
+                - EtcdV3
+                - GCS
+                - Google
+                type: string
+            required:
+            - kind
+            - name
+            - type
+            type: object
+          type: array
         kind:
           description: 'Kind is a string value representing the REST resource this
             object represents. Servers may infer this from the endpoint the client
@@ -65,7 +96,20 @@ spec:
               type: string
           type: object
         status:
-          type: string
+          description: EtcdV3 status defines the status of EtcdV3
+          properties:
+            phase:
+              description: The current phase of the terraform workflow
+              type: string
+            state:
+              enum:
+              - Success
+              - Failure
+              type: string
+          required:
+          - phase
+          - state
+          type: object
       type: object
   version: v1alpha1
   versions:
