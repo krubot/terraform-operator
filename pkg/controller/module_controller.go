@@ -78,6 +78,70 @@ func (r *ReconcileModule) deletionReconcile(moduleInterface interface{}, finaliz
 	return nil
 }
 
+func (r *ReconcileModule) dependencyReconcile(moduleInterface interface{}, depInterfaces ...interface{}) (bool, error) {
+	// Set the initial depency state
+	dependency_met := true
+	// Over the list of dependencies
+	for _, depInterface := range depInterfaces {
+		switch module := moduleInterface.(type) {
+		case *modulev1alpha1.GCS:
+			for _, depModule := range module.Dep {
+				switch dep := depInterface.(type) {
+				case *modulev1alpha1.GCS:
+					if depModule.Kind == "Module" {
+						if err := r.Get(context.Background(), types.NamespacedName{Name: depModule.Name, Namespace: module.ObjectMeta.Namespace}, dep); err != nil {
+							return dependency_met, err
+						}
+						if dep.Status.State == "Success" {
+							// Add finalizer to the GoogleStorageBucket. resource
+							util.AddFinalizer(dep, "Module_"+module.Kind+"_"+module.ObjectMeta.Name)
+							// Update the CR with finalizer
+							if err := r.Update(context.Background(), dep); err != nil {
+								return dependency_met, err
+							}
+						} else {
+							dependency_met = false
+						}
+					}
+				case *providerv1alpha1.Google:
+					if depModule.Kind == "Provider" {
+						if err := r.Get(context.Background(), types.NamespacedName{Name: depModule.Name, Namespace: module.ObjectMeta.Namespace}, dep); err != nil {
+							return dependency_met, err
+						}
+						if dep.Status.State == "Success" {
+							// Add finalizer to the GoogleStorageBucket resource
+							util.AddFinalizer(dep, "Module_"+module.Kind+"_"+module.ObjectMeta.Name)
+							// Update the CR with finalizer
+							if err := r.Update(context.Background(), dep); err != nil {
+								return dependency_met, err
+							}
+						} else {
+							dependency_met = false
+						}
+					}
+				case *backendv1alpha1.EtcdV3:
+					if depModule.Kind == "Backend" {
+						if err := r.Get(context.Background(), types.NamespacedName{Name: depModule.Name, Namespace: module.ObjectMeta.Namespace}, dep); err != nil {
+							return dependency_met, err
+						}
+						if dep.Status.State == "Success" {
+							// Add finalizer to the GoogleStorageBucket resource
+							util.AddFinalizer(dep, "Module_"+module.Kind+"_"+module.ObjectMeta.Name)
+							// Update the CR with finalizer
+							if err := r.Update(context.Background(), dep); err != nil {
+								return dependency_met, err
+							}
+						} else {
+							dependency_met = false
+						}
+					}
+				}
+			}
+		}
+	}
+	return dependency_met, nil
+}
+
 func (r *ReconcileModule) terraformReconcile(moduleInterface interface{}) error {
 	switch module := moduleInterface.(type) {
 	case *modulev1alpha1.GCS:
@@ -270,93 +334,31 @@ func (r *ReconcileModule) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return reconcile.Result{}, nil
 	}
 
-	// Set the initial depency state
-	dependency_met := true
-
-	// Over the list of dependencies
-	for _, dep := range module.Dep {
-		depProvider := &providerv1alpha1.Google{}
-		depModule := &modulev1alpha1.GCS{}
-		depBackend := &backendv1alpha1.EtcdV3{}
-
-		if dep.Kind == "Backend" {
-			if err := r.Get(context.Background(), types.NamespacedName{Name: dep.Name, Namespace: req.NamespacedName.Namespace}, depBackend); err != nil {
+	if dependency_met, err := r.dependencyReconcile(module, provider, backend); err == nil {
+		// Check if dependency is met else interate again
+		if !dependency_met {
+			// Set the data
+			module.Status.State = "Failure"
+			module.Status.Phase = "Dependency"
+			// Update the CR with status success
+			if err := r.Status().Update(context.Background(), module); err != nil {
 				return reconcile.Result{}, err
 			}
-
-			if depBackend.Status.State == "Success" {
-				// Add finalizer to the module resource
-				util.AddFinalizer(depBackend, "Module_"+module.Kind+"_"+module.ObjectMeta.Name)
-
-				// Update the CR with finalizer
-				if err := r.Update(context.Background(), depBackend); err != nil {
-					return reconcile.Result{}, err
-				}
-			} else {
-				dependency_met = false
-			}
+			// Dependency not met, don't error but finish reconcile until next change
+			return reconcile.Result{}, nil
 		}
 
-		if dep.Kind == "Module" {
-			if err := r.Get(context.Background(), types.NamespacedName{Name: dep.Name, Namespace: req.NamespacedName.Namespace}, depModule); err != nil {
+		if !reflect.DeepEqual("Dependency", module.Status.Phase) {
+			// Set the data
+			module.Status.State = "Success"
+			module.Status.Phase = "Dependency"
+			// Update the CR with status ready
+			if err := r.Status().Update(context.Background(), module); err != nil {
 				return reconcile.Result{}, err
 			}
-
-			if depModule.Status.State == "Success" {
-				// Add finalizer to the module resource
-				util.AddFinalizer(depModule, "Module_"+module.Kind+"_"+module.ObjectMeta.Name)
-
-				// Update the CR with finalizer
-				if err := r.Update(context.Background(), depModule); err != nil {
-					return reconcile.Result{}, err
-				}
-			} else {
-				dependency_met = false
-			}
 		}
-
-		if dep.Kind == "Provider" {
-			if err := r.Get(context.Background(), types.NamespacedName{Name: dep.Name, Namespace: req.NamespacedName.Namespace}, depProvider); err != nil {
-				return reconcile.Result{}, err
-			}
-
-			if depProvider.Status.State == "Success" {
-				// Add finalizer to the module resource
-				util.AddFinalizer(depProvider, "Module_"+module.Kind+"_"+module.ObjectMeta.Name)
-
-				// Update the CR with finalizer
-				if err := r.Update(context.Background(), depProvider); err != nil {
-					return reconcile.Result{}, err
-				}
-			} else {
-				dependency_met = false
-			}
-		}
-	}
-
-	// Check if dependency is met else interate again
-	if !dependency_met {
-		// Set the data
-		module.Status.State = "Failure"
-		module.Status.Phase = "Dependency"
-
-		// Update the CR with status success
-		if err := r.Status().Update(context.Background(), module); err != nil {
-			return reconcile.Result{}, err
-		}
-
-		return reconcile.Result{}, nil
-	}
-
-	if !reflect.DeepEqual("Dependency", module.Status.Phase) {
-		// Set the data
-		module.Status.State = "Success"
-		module.Status.Phase = "Dependency"
-
-		// Update the CR with status ready
-		if err := r.Status().Update(context.Background(), module); err != nil {
-			return reconcile.Result{}, err
-		}
+	} else {
+		return reconcile.Result{}, err
 	}
 
 	// Add finalizer to the module resource
