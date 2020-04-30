@@ -31,11 +31,59 @@ type ReconcileBackend struct {
 	Scheme *runtime.Scheme
 }
 
+func (r *ReconcileBackend) deletionReconcile(backendInterface interface{}, finalizerInterfaces ...interface{}) error {
+	for _, finalizerInterface := range finalizerInterfaces {
+		switch backend := backendInterface.(type) {
+		case *backendv1alpha1.EtcdV3:
+			for _, fin := range backend.GetFinalizers() {
+				instance_split_fin := strings.Split(fin, "_")
+				switch finalizer := finalizerInterface.(type) {
+				case *modulev1alpha1.GCS:
+					if instance_split_fin[0] == "Module" && instance_split_fin[1] == "GCS" {
+						if err := r.Get(context.Background(), types.NamespacedName{Name: instance_split_fin[2], Namespace: backend.ObjectMeta.Namespace}, finalizer); errors.IsNotFound(err) {
+							util.RemoveFinalizer(backend, fin)
+							if err := r.Update(context.Background(), backend); err != nil {
+								return err
+							}
+						} else {
+							return errors.NewBadRequest("GCS dependency is not met for deletion")
+						}
+					}
+				case *providerv1alpha1.Google:
+					if instance_split_fin[0] == "Provider" && instance_split_fin[1] == "Google" {
+						if err := r.Get(context.Background(), types.NamespacedName{Name: instance_split_fin[2], Namespace: backend.ObjectMeta.Namespace}, finalizer); errors.IsNotFound(err) {
+							util.RemoveFinalizer(backend, fin)
+							if err := r.Update(context.Background(), backend); err != nil {
+								return err
+							}
+						} else {
+							return errors.NewBadRequest("Google dependency is not met for deletion")
+						}
+					}
+				case *backendv1alpha1.EtcdV3:
+					if instance_split_fin[0] == "Backend" && instance_split_fin[1] == "EtcdV3" && instance_split_fin[2] != backend.ObjectMeta.Name {
+						if err := r.Get(context.Background(), types.NamespacedName{Name: instance_split_fin[2], Namespace: backend.ObjectMeta.Namespace}, finalizer); errors.IsNotFound(err) {
+							util.RemoveFinalizer(backend, fin)
+							if err := r.Update(context.Background(), backend); err != nil {
+								return err
+							}
+						} else {
+							return errors.NewBadRequest("EtcdV3 dependency is not met for deletion")
+						}
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
 // +kubebuilder:rbac:groups=batch.my.domain,resources=cronjobs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=batch.my.domain,resources=cronjobs/status,verbs=get;update;patch
 
 func (r *ReconcileBackend) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	// Fetch the Backend instance
+	module := &modulev1alpha1.GCS{}
+	provider := &providerv1alpha1.Google{}
 	backend := &backendv1alpha1.EtcdV3{}
 
 	if err := r.Get(context.Background(), req.NamespacedName, backend); err != nil {
@@ -58,48 +106,8 @@ func (r *ReconcileBackend) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if util.IsBeingDeleted(backend) {
-		finalizersProvider := &providerv1alpha1.Google{}
-		finalizersModule := &modulev1alpha1.GCS{}
-		finalizersBackend := &backendv1alpha1.EtcdV3{}
-
-		for _, fin := range backend.GetFinalizers() {
-			instance_split_fin := strings.Split(fin, "_")
-
-			if instance_split_fin[0] == "Backend" && instance_split_fin[1] == "EtcdV3" && instance_split_fin[2] != backend.ObjectMeta.Name {
-				if err := r.Get(context.Background(), types.NamespacedName{Name: instance_split_fin[2], Namespace: req.NamespacedName.Namespace}, finalizersBackend); errors.IsNotFound(err) {
-					util.RemoveFinalizer(backend, fin)
-
-					if err := r.Update(context.Background(), backend); err != nil {
-						return reconcile.Result{}, err
-					}
-				} else {
-					return reconcile.Result{}, errors.NewBadRequest("backend dependency is not met for deletion")
-				}
-			}
-
-			if instance_split_fin[0] == "Provider" && instance_split_fin[1] == "Google" {
-				if err := r.Get(context.Background(), types.NamespacedName{Name: instance_split_fin[2], Namespace: req.NamespacedName.Namespace}, finalizersProvider); errors.IsNotFound(err) {
-					util.RemoveFinalizer(backend, fin)
-
-					if err := r.Update(context.Background(), backend); err != nil {
-						return reconcile.Result{}, err
-					}
-				} else {
-					return reconcile.Result{}, errors.NewBadRequest("provider dependency is not met for deletion")
-				}
-			}
-
-			if instance_split_fin[0] == "Module" && instance_split_fin[1] == "GCS" {
-				if err := r.Get(context.Background(), types.NamespacedName{Name: instance_split_fin[2], Namespace: req.NamespacedName.Namespace}, finalizersModule); errors.IsNotFound(err) {
-					util.RemoveFinalizer(backend, fin)
-
-					if err := r.Update(context.Background(), backend); err != nil {
-						return reconcile.Result{}, err
-					}
-				} else {
-					return reconcile.Result{}, errors.NewBadRequest("module dependency is not met for deletion")
-				}
-			}
+		if err := r.deletionReconcile(backend, module, provider); err != nil {
+			return reconcile.Result{}, err
 		}
 
 		if err := terraform.WriteToFile([]byte("{}"), backend.ObjectMeta.Namespace, "Backend_"+backend.Kind+"_"+backend.ObjectMeta.Name); err != nil {
