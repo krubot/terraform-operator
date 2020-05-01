@@ -5,7 +5,6 @@
 
 resource "google_storage_bucket" "bucket" {
   name          = var.name
-  project       = var.project
   location      = var.location
   storage_class = var.storage_class
   labels        = merge(var.labels, { name = replace("${lower(var.name)}", ".", "-") })

@@ -1,11 +1,10 @@
 apiVersion: module.terraform.io/v1alpha1
-kind: GCS
+kind: GoogleStorageBucket
 metadata:
   name: test
 spec:
-  source: "/opt/modules/gcp/gcs/"
-  name: "<bucket-name>"
-  project: "<project>"
+  source: "/opt/modules/gcp/google_storage_bucket/"
+  name: "<bucket>"
 dep:
   - kind: Provider
     name: cloud

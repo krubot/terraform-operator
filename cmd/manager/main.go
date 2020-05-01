@@ -108,7 +108,16 @@ func main() {
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("Module"),
 		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	}).SetupWithGoogleStorageBucket(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Module")
+		os.Exit(1)
+	}
+
+	if err = (&controllers.ReconcileModule{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("Module"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithGoogleStorageBucketIAMMember(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Module")
 		os.Exit(1)
 	}

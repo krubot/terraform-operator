@@ -6,7 +6,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: etcdv3.backend.terraform.io
+  name: etcdv3s.backend.terraform.io
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.state
@@ -21,9 +21,9 @@ spec:
   names:
     kind: EtcdV3
     listKind: EtcdV3List
-    plural: etcdv3
+    plural: etcdv3s
     shortNames:
-    - bac
+    - etcdv3
     singular: etcdv3
   scope: Namespaced
   subresources:
@@ -55,7 +55,7 @@ spec:
                 description: Dependency type
                 enum:
                 - EtcdV3
-                - GCS
+                - GoogleStorageBucket
                 - Google
                 type: string
             required:
