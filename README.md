@@ -2,17 +2,14 @@
 
 Currently still in POC stage, there are plans to extend this functionality soon. Feel free to create issues but note it's only one person working here 😄
 
-Simply want the image run `make image`.
+Simply want the binary run `make`.
 
 ## Pre-requisites
 
 The following are needed to run this repo:
 
  - Kubernetes cluster - [minikube](https://github.com/kubernetes/minikube) is a simple tool for this
- - Operator SDK - install guide can be found [here](https://github.com/operator-framework/operator-sdk)
  - Helm - binary can be found [here](https://github.com/helm/helm)
- - Quay.io login - Login page can be found [here](https://quay.io/)
-
 
 Make sure to have also forked and cloned the repo if you are deploying with [flux](https://github.com/weaveworks/flux). This is recommended since it'll sync all your changes and help you to deploy consistently.
 
@@ -21,13 +18,13 @@ Make sure to have also forked and cloned the repo if you are deploying with [flu
 To build the operator image run the following:
 
 ```sh
-operator-sdk build quay.io/YOURUSER/terraform-operator:latest
+IMG=<image-repo> make docker-build
 ```
 
-Now push to `quay.io` by running:
+Now push to your repo run:
 
 ```sh
-docker push quay.io/YOURUSER/terraform-operator:latest
+IMG=<image-repo> make docker-push
 ```
 
 ## Running Helm and Flux
@@ -35,8 +32,7 @@ docker push quay.io/YOURUSER/terraform-operator:latest
 To run the pipeline all the way through please deploy `helm` and `flux` with the following command:
 
 ```sh
-kubectl apply -f manifest/helm.yaml
-kubectl apply -f manifest/flux.yaml
+kubectl apply -k deploy/01-manifests/
 ```
 
 Calico is also here if you deploying kubernetes from scratch. Apply with a similar command.
