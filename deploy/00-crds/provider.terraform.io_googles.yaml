@@ -6,7 +6,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: google.provider.terraform.io
+  name: googles.provider.terraform.io
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.state
@@ -21,9 +21,9 @@ spec:
   names:
     kind: Google
     listKind: GoogleList
-    plural: google
+    plural: googles
     shortNames:
-    - pro
+    - google
     singular: google
   scope: Namespaced
   subresources:
@@ -55,7 +55,7 @@ spec:
                 description: Dependency type
                 enum:
                 - EtcdV3
-                - GCS
+                - GoogleStorageBucket
                 - Google
                 type: string
             required:
@@ -97,8 +97,17 @@ spec:
           properties:
             phase:
               description: The current phase of the terraform workflow
+              enum:
+              - Dependency
+              - Output
+              - Init
+              - Workspace
+              - Validate
+              - Plan
+              - Apply
               type: string
             state:
+              description: The current state of the terraform workflow
               enum:
               - Success
               - Failure

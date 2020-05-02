@@ -2,3 +2,4 @@ resources:
   - etcdv3.yaml
   - google.yaml
   - bucket.yaml
+  - bucket_iam_members.yaml

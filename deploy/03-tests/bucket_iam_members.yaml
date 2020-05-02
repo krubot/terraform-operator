@@ -1,0 +1,21 @@
+apiVersion: module.terraform.io/v1alpha1
+kind: GoogleStorageBucketIAMMember
+metadata:
+  name: test
+spec:
+  source: "/opt/modules/gcp/google_storage_bucket_iam_member/"
+  entities:
+    - "<bucket>"
+  bindings:
+    "roles/storage.legacyBucketReader":
+      - "user:<user>"
+dep:
+  - kind: Provider
+    name: cloud
+    type: Google
+  - kind: Backend
+    name: state
+    type: EtcdV3
+  - kind: Module
+    name: test
+    type: GoogleStorageBucket

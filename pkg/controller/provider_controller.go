@@ -38,15 +38,26 @@ func (r *ReconcileProvider) deletionReconcile(providerInterface interface{}, fin
 			for _, fin := range provider.GetFinalizers() {
 				instance_split_fin := strings.Split(fin, "_")
 				switch finalizer := finalizerInterface.(type) {
-				case *modulev1alpha1.GCS:
-					if instance_split_fin[0] == "Module" && instance_split_fin[1] == "GCS" {
+				case *modulev1alpha1.GoogleStorageBucket:
+					if instance_split_fin[0] == "Module" && instance_split_fin[1] == "GoogleStorageBucket" {
 						if err := r.Get(context.Background(), types.NamespacedName{Name: instance_split_fin[2], Namespace: provider.ObjectMeta.Namespace}, finalizer); errors.IsNotFound(err) {
 							util.RemoveFinalizer(provider, fin)
 							if err := r.Update(context.Background(), provider); err != nil {
 								return err
 							}
 						} else {
-							return errors.NewBadRequest("GCS dependency is not met for deletion")
+							return errors.NewBadRequest("GoogleStorageBucket dependency is not met for deletion")
+						}
+					}
+				case *modulev1alpha1.GoogleStorageBucketIAMMember:
+					if instance_split_fin[0] == "Module" && instance_split_fin[1] == "GoogleStorageBucketIAMMember" {
+						if err := r.Get(context.Background(), types.NamespacedName{Name: instance_split_fin[2], Namespace: provider.ObjectMeta.Namespace}, finalizer); errors.IsNotFound(err) {
+							util.RemoveFinalizer(provider, fin)
+							if err := r.Update(context.Background(), provider); err != nil {
+								return err
+							}
+						} else {
+							return errors.NewBadRequest("GoogleStorageBucketIAMMember dependency is not met for deletion")
 						}
 					}
 				case *providerv1alpha1.Google:
@@ -87,7 +98,23 @@ func (r *ReconcileProvider) dependencyReconcile(providerInterface interface{}, d
 		case *providerv1alpha1.Google:
 			for _, depProvider := range provider.Dep {
 				switch dep := depInterface.(type) {
-				case *modulev1alpha1.GCS:
+				case *modulev1alpha1.GoogleStorageBucket:
+					if depProvider.Kind == "Module" {
+						if err := r.Get(context.Background(), types.NamespacedName{Name: depProvider.Name, Namespace: provider.ObjectMeta.Namespace}, dep); err != nil {
+							return dependency_met, err
+						}
+						if dep.Status.State == "Success" {
+							// Add finalizer to the GoogleStorageBucket. resource
+							util.AddFinalizer(dep, "Provider_"+provider.Kind+"_"+provider.ObjectMeta.Name)
+							// Update the CR with finalizer
+							if err := r.Update(context.Background(), dep); err != nil {
+								return dependency_met, err
+							}
+						} else {
+							dependency_met = false
+						}
+					}
+				case *modulev1alpha1.GoogleStorageBucketIAMMember:
 					if depProvider.Kind == "Module" {
 						if err := r.Get(context.Background(), types.NamespacedName{Name: depProvider.Name, Namespace: provider.ObjectMeta.Namespace}, dep); err != nil {
 							return dependency_met, err
@@ -146,20 +173,10 @@ func (r *ReconcileProvider) dependencyReconcile(providerInterface interface{}, d
 // +kubebuilder:rbac:groups=batch.my.domain,resources=cronjobs/status,verbs=get;update;patch
 
 func (r *ReconcileProvider) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	module := &modulev1alpha1.GCS{}
-	provider := &providerv1alpha1.Google{}
-	backend := &backendv1alpha1.EtcdV3{}
-
-	if err := r.Get(context.Background(), req.NamespacedName, provider); err != nil {
-		if errors.IsNotFound(err) {
-			// Request object not found, could have been deleted after reconcile request.
-			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
-			// Return and don't requeue
-			return reconcile.Result{}, nil
-		}
-		// Error reading the object - requeue the request.
-		return reconcile.Result{}, err
-	}
+	GoogleStorageBucket := &modulev1alpha1.GoogleStorageBucket{}
+	GoogleStorageBucketIAMMember := &modulev1alpha1.GoogleStorageBucketIAMMember{}
+	Google := &providerv1alpha1.Google{}
+	EtcdV3 := &backendv1alpha1.EtcdV3{}
 
 	for {
 		e := "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
@@ -169,78 +186,80 @@ func (r *ReconcileProvider) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 	}
 
-	if util.IsBeingDeleted(provider) {
-		if err := r.deletionReconcile(provider, backend, module); err != nil {
-			return reconcile.Result{}, err
-		}
-
-		if err := terraform.WriteToFile([]byte("{}"), provider.ObjectMeta.Namespace, "Provider_"+provider.Kind+"_"+provider.ObjectMeta.Name); err != nil {
-			return reconcile.Result{}, err
-		}
-
-		util.RemoveFinalizer(provider, "Provider_"+provider.Kind+"_"+provider.ObjectMeta.Name)
-
-		if err := r.Update(context.Background(), provider); err != nil {
-			return reconcile.Result{}, err
-		}
-
-		return reconcile.Result{}, nil
-	}
-
-	if dependency_met, err := r.dependencyReconcile(provider, module, backend); err == nil {
-		// Check if dependency is met else interate again
-		if !dependency_met {
-			// Set the data
-			provider.Status.State = "Failure"
-			provider.Status.Phase = "Dependency"
-			// Update the CR with status success
-			if err := r.Status().Update(context.Background(), provider); err != nil {
+	if err := r.Get(context.Background(), req.NamespacedName, Google); !errors.IsNotFound(err) {
+		if util.IsBeingDeleted(Google) {
+			if err := r.deletionReconcile(Google, EtcdV3, GoogleStorageBucket, GoogleStorageBucketIAMMember); err != nil {
 				return reconcile.Result{}, err
 			}
-			// Dependency not met, don't error but finish reconcile until next change
+
+			if err := terraform.WriteToFile([]byte("{}"), Google.ObjectMeta.Namespace, "Provider_"+Google.Kind+"_"+Google.ObjectMeta.Name); err != nil {
+				return reconcile.Result{}, err
+			}
+
+			util.RemoveFinalizer(Google, "Provider_"+Google.Kind+"_"+Google.ObjectMeta.Name)
+
+			if err := r.Update(context.Background(), Google); err != nil {
+				return reconcile.Result{}, err
+			}
+
 			return reconcile.Result{}, nil
 		}
 
-		if !reflect.DeepEqual("Dependency", provider.Status.Phase) {
+		if dependency_met, err := r.dependencyReconcile(Google, EtcdV3, GoogleStorageBucket, GoogleStorageBucketIAMMember); err == nil {
+			// Check if dependency is met else interate again
+			if !dependency_met {
+				// Set the data
+				Google.Status.State = "Failure"
+				Google.Status.Phase = "Dependency"
+				// Update the CR with status success
+				if err := r.Status().Update(context.Background(), Google); err != nil {
+					return reconcile.Result{}, err
+				}
+				// Dependency not met, don't error but finish reconcile until next change
+				return reconcile.Result{}, nil
+			}
+
+			if !reflect.DeepEqual("Dependency", Google.Status.Phase) {
+				// Set the data
+				Google.Status.State = "Success"
+				Google.Status.Phase = "Dependency"
+				// Update the CR with status ready
+				if err := r.Status().Update(context.Background(), Google); err != nil {
+					return reconcile.Result{}, err
+				}
+			}
+		} else {
+			return reconcile.Result{}, err
+		}
+
+		// Add finalizer to the module resource
+		util.AddFinalizer(Google, "Provider_"+Google.Kind+"_"+Google.ObjectMeta.Name)
+
+		// Update the CR with finalizer
+		if err := r.Update(context.Background(), Google); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		b, err := terraform.RenderProviderToTerraform(Google.Spec, strings.ToLower(Google.Kind))
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		err = terraform.WriteToFile(b, Google.ObjectMeta.Namespace, "Provider_"+Google.Kind+"_"+Google.ObjectMeta.Name)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		// Update CR with the AppStatus == Created
+		if !reflect.DeepEqual("Ready", Google.Status.State) {
 			// Set the data
-			provider.Status.State = "Success"
-			provider.Status.Phase = "Dependency"
-			// Update the CR with status ready
-			if err := r.Status().Update(context.Background(), provider); err != nil {
+			Google.Status.State = "Success"
+			Google.Status.Phase = "Output"
+
+			// Update the CR
+			if err = r.Status().Update(context.Background(), Google); err != nil {
 				return reconcile.Result{}, err
 			}
-		}
-	} else {
-		return reconcile.Result{}, err
-	}
-
-	// Add finalizer to the module resource
-	util.AddFinalizer(provider, "Provider_"+provider.Kind+"_"+provider.ObjectMeta.Name)
-
-	// Update the CR with finalizer
-	if err := r.Update(context.Background(), provider); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	b, err := terraform.RenderProviderToTerraform(provider.Spec, strings.ToLower(provider.Kind))
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	err = terraform.WriteToFile(b, provider.ObjectMeta.Namespace, "Provider_"+provider.Kind+"_"+provider.ObjectMeta.Name)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// Update CR with the AppStatus == Created
-	if !reflect.DeepEqual("Ready", provider.Status.State) {
-		// Set the data
-		provider.Status.State = "Success"
-		provider.Status.Phase = "Output"
-
-		// Update the CR
-		if err = r.Status().Update(context.Background(), provider); err != nil {
-			return reconcile.Result{}, err
 		}
 	}
 
