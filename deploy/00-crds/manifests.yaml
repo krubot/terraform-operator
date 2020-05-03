@@ -1,0 +1,28 @@
+---
+
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: terraform-operator-admission
+webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: terraform-operator-webhook
+      namespace: infra
+      path: /validate-terraform
+  failurePolicy: Fail
+  name: terraform.validation.webhook.terraform.io
+  rules:
+  - apiGroups:
+    - module.terraform.io
+    apiVersions:
+    - '*'
+    operations:
+    - CREATE
+    - UPDATE
+    - DELETE
+    resources:
+    - googlestoragebuckets
+    - googlestoragebucketiammembers

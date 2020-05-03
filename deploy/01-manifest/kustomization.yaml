@@ -1,0 +1,9 @@
+resources:
+  - clusterrole.yaml
+  - clusterrolebinding.yaml
+  - job-create-secret.yaml
+  - job-patch-webhook.yaml
+  - psp.yaml
+  - role.yaml
+  - rolebinding.yaml
+  - sa.yaml

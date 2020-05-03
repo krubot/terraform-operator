@@ -31,6 +31,7 @@ WORKDIR ${USER_WORKDIR}
 
 COPY --from=builder /workspace/manager .
 COPY modules /opt/modules
+COPY policies /opt/policies
 
 USER ${USER_UID}:${USER_UID}
 

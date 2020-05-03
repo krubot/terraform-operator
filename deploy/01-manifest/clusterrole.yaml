@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: terraform-operator-admission
+rules:
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  - mutatingwebhookconfigurations
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - extensions
+  resourceNames:
+  - terraform-operator-admission
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use

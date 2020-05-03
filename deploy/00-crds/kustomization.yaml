@@ -1,4 +1,5 @@
 resources:
+  - manifests.yaml
   - backend.terraform.io_etcdv3s.yaml
   - provider.terraform.io_googles.yaml
   - module.terraform.io_googlestoragebuckets.yaml

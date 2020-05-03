@@ -28,6 +28,9 @@ spec:
         args:
         - --enable-leader-election
         imagePullPolicy: Always
+        volumeMounts:
+        - name: admission-secrets
+          mountPath: "/tmp/k8s-webhook-server/serving-certs"
         readinessProbe:
           httpGet:
             path: /readyz
@@ -41,3 +44,7 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 15
       serviceAccountName: terraform-operator
+      volumes:
+      - name: admission-secrets
+        secret:
+          secretName: terraform-operator-admission

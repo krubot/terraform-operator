@@ -1,8 +1,9 @@
+---
 {{- if .Values.monitoringEnable }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "terraform.fullname" . }}
+  name: {{ include "terraform.fullname" . }}-metrics
   labels:
     app: {{ include "terraform.name" . }}
     chart: {{ include "terraform.chart" . }}
@@ -19,6 +20,34 @@ spec:
       port: 8383
       protocol: TCP
       targetPort: 8383
+  selector:
+    app: {{ include "terraform.name" . }}
+    release: {{ .Release.Name }}
+  type: ClusterIP
+{{- end }}
+
+---
+{{- if .Values.webhookEnable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "terraform.fullname" . }}-webhook
+  labels:
+    app: {{ include "terraform.name" . }}
+    chart: {{ include "terraform.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- with .Values.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  clusterIP: None
+  ports:
+    - name: terraform-operator-webhook
+      port: 443
+      protocol: TCP
+      targetPort: 9443
   selector:
     app: {{ include "terraform.name" . }}
     release: {{ .Release.Name }}

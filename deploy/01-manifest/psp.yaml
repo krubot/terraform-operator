@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: terraform-operator-admission
+spec:
+  allowPrivilegeEscalation: true
+  fsGroup:
+    ranges:
+    - max: 65535
+      min: 0
+    rule: MustRunAs
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    ranges:
+    - max: 65535
+      min: 0
+    rule: MustRunAs
+  volumes:
+  - configMap
+  - emptyDir
+  - projected
+  - secret
+  - downwardAPI
+  - persistentVolumeClaim

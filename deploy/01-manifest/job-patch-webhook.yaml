@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: terraform-operator-admission-patch
+  namespace: infra
+spec:
+  template:
+    metadata:
+      name: terraform-operator-admission-patch
+    spec:
+      containers:
+      - args:
+        - patch
+        - --webhook-name=terraform-operator-admission
+        - --namespace=infra
+        - --secret-name=terraform-operator-admission
+        - --patch-failure-policy=Fail
+        image: jettech/kube-webhook-certgen:v1.0.0
+        imagePullPolicy: IfNotPresent
+        name: patch
+      restartPolicy: OnFailure
+      serviceAccount: terraform-operator-admission

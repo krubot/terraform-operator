@@ -18,3 +18,5 @@ serviceAccount:
 pspEnable: true
 monitoringEnable: true
 etcdClusterEnable: true
+metricsEnable: true
+webhookEnable: true
