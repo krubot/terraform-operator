@@ -13,7 +13,7 @@ spec:
   releaseName: terraform-operator
   chart:
     git: ssh://git@github.com/krubot/terraform-operator
-    ref: improve-deployment
+    ref: master
     path: charts/terraform-operator
   values:
     replicaCount: 1

@@ -35,34 +35,36 @@ To install helm flux please run the following:
 kubectl create ns flux
 ```
 
+Next we need to create the CRD's for helm operator in advance of creating the deployment:
+
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/1.1.0/deploy/crds.yaml
 ```
 
-```sh
-helm repo add fluxcd https://charts.fluxcd.io
-```
+Now we can add the fluxcd charts and run a install:
 
 ```sh
+helm repo add fluxcd https://charts.fluxcd.io
+
 helm upgrade -i flux fluxcd/flux \
     --namespace flux \
     --set git.url=git@github.com:krubot/terraform-operator \
     --set git.readonly=true \
     --set rbac.pspEnabled=true
-```
 
-```sh
 helm upgrade -i helm-operator fluxcd/helm-operator \
     --namespace flux \
     --set git.ssh.secretName=flux-git-deploy \
     --set helm.versions=v3
 ```
 
+The following need to now be run to get the pubic ssh key:
+
 ```sh
 kubectl -n flux logs deployment/flux | grep identity.pub | cut -d '"' -f2
 ```
 
-This should output a ssh key which you add to your deployments configuration within your github repo. This key does not need write access so don't tick this box.
+This should output should be the whole key which you add to your deployments configuration within your github repo. This key does not need write access so don't tick this box.
 
 ## Running some tests
 
