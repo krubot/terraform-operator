@@ -1,4 +1,0 @@
-resources:
-  - calico.yaml
-  - helm.yaml
-  - flux.yaml
