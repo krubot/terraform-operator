@@ -29,13 +29,30 @@ IMG=<image-repo> make docker-push
 
 ## Running Helm and Flux
 
-To run the pipeline all the way through please deploy `helm` and `flux` with the following command:
+To install helm flux please run the following:
 
 ```sh
-kubectl apply -k deploy/01-manifests/
+kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/1.1.0/deploy/crds.yaml
 ```
 
-Calico is also here if you deploying kubernetes from scratch. Apply with a similar command.
+```sh
+helm repo add fluxcd https://charts.fluxcd.io
+```
+
+```sh
+helm upgrade -i flux fluxcd/flux \
+    --namespace infra \
+    --set git.url=git@github.com:krubot/terraform-operator \
+    --set git.readonly=true \
+    --set git.branch=improve-deployment 
+```
+
+```sh
+helm upgrade -i helm-operator fluxcd/helm-operator \
+    --namespace infra \
+    --set git.ssh.secretName=flux-git-deploy \
+    --set helm.versions=v3
+```
 
 ## Running some tests
 

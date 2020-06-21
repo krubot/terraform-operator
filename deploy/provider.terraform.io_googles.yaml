@@ -4,9 +4,9 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
-  name: etcdv3s.backend.terraform.io
+  name: googles.provider.terraform.io
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.state
@@ -17,20 +17,20 @@ spec:
     description: Description of the current phase
     name: Phase
     type: string
-  group: backend.terraform.io
+  group: provider.terraform.io
   names:
-    kind: EtcdV3
-    listKind: EtcdV3List
-    plural: etcdv3s
+    kind: Google
+    listKind: GoogleList
+    plural: googles
     shortNames:
-    - etcdv3
-    singular: etcdv3
+    - google
+    singular: google
   scope: Namespaced
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: Etcdv3 is the Schema for the Etcdv3s API
+      description: Google is the Schema for the Googles API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -39,7 +39,7 @@ spec:
           type: string
         dep:
           items:
-            description: DepSpec defines the dependency list of EtcdV3
+            description: DepSpec defines the dependency list of Google
             properties:
               kind:
                 description: Dependency kind
@@ -72,36 +72,42 @@ spec:
         metadata:
           type: object
         spec:
-          description: Etcdv3Spec defines the desired state of Etcdv3
+          description: GoogleSpec defines the desired state of Google
           properties:
-            cacert_path:
-              description: EtcdV3 backend cacert path
+            credentials:
+              description: Either the path to or the contents of a service account
+                key file in JSON format.
               type: string
-            cert_path:
-              description: EtcdV3 backend cert path
+            project:
+              description: The default project to manage resources in. If another
+                project is specified on a resource, it will take precedence.
               type: string
-            endpoints:
-              description: EtcdV3 Etcdv3 endpoints
-              items:
-                type: string
-              type: array
-            key_path:
-              description: EtcdV3 backend key path
+            region:
+              description: The default region to manage resources in. If another region
+                is specified on a regional resource, it will take precedence.
               type: string
-            lock:
-              description: EtcdV3 backend lock
-              type: boolean
-            prefix:
-              description: EtcdV3 backend prefix
+            zone:
+              description: The default zone to manage resources in. Generally, this
+                zone should be within the default region you specified. If another
+                zone is specified on a zonal resource, it will take precedence.
               type: string
           type: object
         status:
-          description: EtcdV3 status defines the status of EtcdV3
+          description: Google status defines the status of Google
           properties:
             phase:
               description: The current phase of the terraform workflow
+              enum:
+              - Dependency
+              - Output
+              - Init
+              - Workspace
+              - Validate
+              - Plan
+              - Apply
               type: string
             state:
+              description: The current state of the terraform workflow
               enum:
               - Success
               - Failure

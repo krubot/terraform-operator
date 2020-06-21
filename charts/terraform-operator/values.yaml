@@ -16,5 +16,5 @@ serviceAccount:
     create: false
 
 pspEnable: true
-monitoringEnable: true
-etcdClusterEnable: true
+monitoringEnable: false
+etcdClusterEnable: false
