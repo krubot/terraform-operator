@@ -32,6 +32,10 @@ IMG=<image-repo> make docker-push
 To install helm flux please run the following:
 
 ```sh
+kubectl create ns flux
+```
+
+```sh
 kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/1.1.0/deploy/crds.yaml
 ```
 
@@ -41,18 +45,24 @@ helm repo add fluxcd https://charts.fluxcd.io
 
 ```sh
 helm upgrade -i flux fluxcd/flux \
-    --namespace infra \
+    --namespace flux \
     --set git.url=git@github.com:krubot/terraform-operator \
     --set git.readonly=true \
-    --set git.branch=improve-deployment 
+    --set rbac.pspEnabled=true
 ```
 
 ```sh
 helm upgrade -i helm-operator fluxcd/helm-operator \
-    --namespace infra \
+    --namespace flux \
     --set git.ssh.secretName=flux-git-deploy \
     --set helm.versions=v3
 ```
+
+```sh
+kubectl -n flux logs deployment/flux | grep identity.pub | cut -d '"' -f2
+```
+
+This should output a ssh key which you add to your deployments configuration within your github repo. This key does not need write access so don't tick this box.
 
 ## Running some tests
 
