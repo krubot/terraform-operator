@@ -66,32 +66,19 @@ func RenderBackendToTerraform(instance interface{}, backendName string) ([]byte,
 	return b, nil
 }
 
-func WriteToFile(b []byte, namespace string, name string) error {
-	currentDir, err := os.Getwd()
-	if err != nil {
+func WriteToFile(b []byte, namespace string, name string, path string) error {
+	if err := os.MkdirAll(path+"/"+namespace, os.ModePerm); err != nil {
 		return err
 	}
 
-	err = os.MkdirAll(currentDir+"/"+namespace, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(currentDir+"/"+namespace+"/"+name+".tf.json", b, 0755)
-	if err != nil {
+	if err := ioutil.WriteFile(path+"/"+namespace+"/"+name+".tf.json", b, 0755); err != nil {
 		return err
 	}
 	return nil
 }
 
-func RemoveFile(namespace string, name string) error {
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	err = os.Remove(currentDir + "/" + namespace + "/" + name + ".tf.json")
-	if err != nil {
+func RemoveFile(namespace string, name string, path string) error {
+	if err := os.Remove(path + "/" + namespace + "/" + name + ".tf.json"); err != nil {
 		return err
 	}
 	return nil
