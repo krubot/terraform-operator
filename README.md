@@ -50,6 +50,7 @@ helm upgrade -i flux fluxcd/flux \
     --namespace flux \
     --set git.url=git@github.com:krubot/terraform-operator \
     --set git.readonly=true \
+    --set git.path=deploy \
     --set rbac.pspEnabled=true
 
 helm upgrade -i helm-operator fluxcd/helm-operator \
