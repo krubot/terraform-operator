@@ -27,7 +27,7 @@ run: generate fmt vet manifests
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) webhook paths="./..." output:artifacts:config=deploy
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) webhook paths="./..." output:artifacts:config=deploy/crd
 
 # Run go fmt against code
 fmt:

@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/Azure/go-autorest v13.4.0+incompatible
 	github.com/go-logr/logr v0.1.0
+	github.com/hashicorp/logutils v1.0.0
 	github.com/hashicorp/terraform v0.12.21
 	github.com/hashicorp/terraform-svchost v0.0.0-20191119180714-d2e4933b9136
 	github.com/mattn/go-isatty v0.0.9 // indirect

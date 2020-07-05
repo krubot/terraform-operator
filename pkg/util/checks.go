@@ -1,4 +1,4 @@
-package controllers
+package util
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func checkURL(url string, header http.Header, expectedStatus int) error {
+func CheckURL(url string, header http.Header, expectedStatus int) error {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
