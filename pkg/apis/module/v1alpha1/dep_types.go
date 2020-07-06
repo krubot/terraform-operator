@@ -9,6 +9,6 @@ type DepSpec struct {
 	// Dependency name
 	Name string `json:"name"`
 	// Dependency type
-	// +kubebuilder:validation:Enum={"EtcdV3","GoogleStorageBucket","Google"}
+	// +kubebuilder:validation:Enum={"EtcdV3","GCS","GoogleStorageBucket","GoogleStorageBucketIAMMember","Google"}
 	Type string `json:"type"`
 }

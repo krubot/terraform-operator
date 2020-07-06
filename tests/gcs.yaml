@@ -1,0 +1,11 @@
+apiVersion: backend.terraform.io/v1alpha1
+kind: GCS
+metadata:
+  name: state
+spec:
+  bucket: "<bucket>"
+  prefix: "terraform-state/"
+dep:
+  - kind: Provider
+    name: cloud
+    type: Google
