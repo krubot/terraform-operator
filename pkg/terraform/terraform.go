@@ -1,6 +1,7 @@
 package terraform
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -327,20 +328,31 @@ func TerraformApply(namespace string, path string) error {
 
 	backendInit.Init(services)
 
+	var tplReader bytes.Buffer
+	var tplStdOut bytes.Buffer
+	var tplStdErr bytes.Buffer
+
 	initCmd := &command.ApplyCommand{
 		Meta: command.Meta{
 			Color:               false,
 			RunningInAutomation: true,
 			PluginCacheDir:      config.PluginCacheDir,
 			Ui: &cli.BasicUi{
-				Writer:      os.Stdout,
-				ErrorWriter: os.Stderr,
+				Reader:      &tplReader,
+				Writer:      &tplStdOut,
+				ErrorWriter: &tplStdErr,
 			},
 		},
 	}
 
 	exitCode := initCmd.Run([]string{"-auto-approve"})
 	log.Print("TerraformApply exit code:", exitCode)
+	fmt.Println("heres stdread:")
+	fmt.Println(tplReader.String())
+	fmt.Println("heres stdout:")
+	fmt.Println(tplStdOut.String())
+	fmt.Println("heres stderr:")
+	fmt.Println(tplStdErr.String())
 	if err := os.Chdir(path); err != nil {
 		return errors.New("Couldn't change directory path")
 	}
