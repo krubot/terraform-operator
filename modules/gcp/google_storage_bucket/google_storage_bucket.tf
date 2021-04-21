@@ -8,9 +8,7 @@ resource "google_storage_bucket" "bucket" {
   location      = var.location
   storage_class = var.storage_class
   labels        = merge(var.labels, { name = replace("${lower(var.name)}", ".", "-") })
-
-  force_destroy      = lookup(var.force_destroy,lower(var.name),false)
-  bucket_policy_only = lookup(var.bucket_policy_only,lower(var.name),true)
+  force_destroy = lookup(var.force_destroy,lower(var.name),false)
 
   versioning {
     enabled = lookup(var.versioning,lower(var.name),false)
