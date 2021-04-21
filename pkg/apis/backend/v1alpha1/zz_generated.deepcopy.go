@@ -161,7 +161,7 @@ func (in *GCSList) DeepCopyInto(out *GCSList) {
 	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
-		*out = make([]EtcdV3, len(*in))
+		*out = make([]GCS, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}

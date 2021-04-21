@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -231,7 +230,6 @@ func (r *ReconcileGCS) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		if dependency_met, err := r.dependencyReconcileGCS(GCS, GoogleStorageBucket, GoogleStorageBucketIAMMember, Google, EtcdV3, GCS); err == nil {
 			// Check if dependency is met else interate again
-			fmt.Println("gcs we are here 1")
 			if !dependency_met {
 				// Set the data
 				GCS.Status.State = "Failure"
@@ -244,23 +242,19 @@ func (r *ReconcileGCS) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				return reconcile.Result{}, nil
 			}
 
-			fmt.Println("gcs we are here 2")
-
 			if !reflect.DeepEqual("Dependency", GCS.Status.Phase) {
 				// Set the data
 				GCS.Status.State = "Success"
 				GCS.Status.Phase = "Dependency"
 				// Update the CR with status ready
+
 				if err := r.Status().Update(context.Background(), GCS); err != nil {
 					return reconcile.Result{}, err
 				}
 			}
 		} else {
-			fmt.Println("gcs we got to this err")
 			return reconcile.Result{}, err
 		}
-
-		fmt.Println("gcs but not here")
 
 		// Add finalizer to the module resource
 		util.AddFinalizer(GCS, "Backend_"+GCS.Kind+"_"+GCS.ObjectMeta.Name)
@@ -296,7 +290,7 @@ func (r *ReconcileGCS) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileGCS) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ReconcileGCS) SetupWithGCS(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&backendv1alpha1.GCS{}).
 		Watches(&source.Kind{Type: &backendv1alpha1.GCS{}}, &handler.EnqueueRequestForObject{}).

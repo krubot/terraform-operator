@@ -30,7 +30,7 @@ spec:
     status: {}
   validation:
     openAPIV3Schema:
-      description: Etcdv3 is the Schema for the Etcdv3s API
+      description: GCS is the Schema for the GCS's API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -39,7 +39,7 @@ spec:
           type: string
         dep:
           items:
-            description: DepSpec defines the dependency list of EtcdV3
+            description: DepSpec defines the dependency list
             properties:
               kind:
                 description: Dependency kind
@@ -74,7 +74,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: Etcdv3Spec defines the desired state of Etcdv3
+          description: GCSSpec defines the desired state of GCS
           properties:
             bucket:
               description: GCS bucket name

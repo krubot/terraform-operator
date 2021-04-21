@@ -289,7 +289,7 @@ func (r *ReconcileEtcdV3) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileEtcdV3) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ReconcileEtcdV3) SetupWithEtcdV3(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&backendv1alpha1.EtcdV3{}).
 		Watches(&source.Kind{Type: &backendv1alpha1.EtcdV3{}}, &handler.EnqueueRequestForObject{}).

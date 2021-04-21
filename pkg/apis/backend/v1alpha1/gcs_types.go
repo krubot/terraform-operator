@@ -5,7 +5,7 @@ import (
 )
 
 // +kubebuilder:subresource:status
-// Etcdv3Spec defines the desired state of Etcdv3
+// GCSSpec defines the desired state of GCS
 type GCSSpec struct {
 	// GCS bucket name
 	// +optional
@@ -25,7 +25,7 @@ type GCSSpec struct {
 // +kubebuilder:resource:path="gcs",singular="gcs",scope="Namespaced",shortName="gcs"
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.state",description="Description of the current state"
 // +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase",description="Description of the current phase"
-// Etcdv3 is the Schema for the Etcdv3s API
+// GCS is the Schema for the GCS's API
 type GCS struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -37,12 +37,12 @@ type GCS struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:object:root=true
-// Etcdv3List contains a list of Etcdv3
+// GCSList contains a list of GCS
 type GCSList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 
-	Items []EtcdV3 `json:"items"`
+	Items []GCS `json:"items"`
 }
 
 func init() {

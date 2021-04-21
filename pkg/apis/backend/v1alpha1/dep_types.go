@@ -1,7 +1,7 @@
 package v1alpha1
 
 // +kubebuilder:subresource:status
-// DepSpec defines the dependency list of EtcdV3
+// DepSpec defines the dependency list
 type DepSpec struct {
 	// Dependency kind
 	// +kubebuilder:validation:Enum={"Backend","Module","Provider"}
