@@ -6,7 +6,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
-  name: googlestoragebucketiammembers.module.terraform.io
+  name: gcs.backend.terraform.io
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.state
@@ -17,21 +17,20 @@ spec:
     description: Description of the current phase
     name: Phase
     type: string
-  group: module.terraform.io
+  group: backend.terraform.io
   names:
-    kind: GoogleStorageBucketIAMMember
-    listKind: GoogleStorageBucketIAMMemberList
-    plural: googlestoragebucketiammembers
+    kind: GCS
+    listKind: GCSList
+    plural: gcs
     shortNames:
-    - gsbim
-    singular: googlestoragebucketiammember
+    - gcs
+    singular: gcs
   scope: Namespaced
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: GoogleStorageBucketIAMMember is the Schema for the GoogleStorageBucketIAMMembers
-        API
+      description: GCS is the Schema for the GCS's API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -75,48 +74,22 @@ spec:
         metadata:
           type: object
         spec:
-          description: GoogleStorageBucketIAMMemberSpec defines the desired state
-            of GoogleStorageBucketIAMMember
+          description: GCSSpec defines the desired state of GCS
           properties:
-            bindings:
-              additionalProperties:
-                items:
-                  type: string
-                type: array
-              description: Map of role (key) and list of members (value) to add the
-                IAM policies/bindings
-              type: object
-            entities:
-              description: Entities list to add the IAM policies/bindings
-              items:
-                type: string
-              type: array
-            source:
-              description: Kubernetes namespace GoogleStorageBucketIAMMember source
-              enum:
-              - /opt/modules/gcp/google_storage_bucket_iam_member/
+            bucket:
+              description: GCS bucket name
               type: string
-          required:
-          - bindings
-          - entities
-          - source
+            prefix:
+              description: GCS bucket prefix
+              type: string
           type: object
         status:
-          description: StatusSpec status defines the status
+          description: EtcdV3 status defines the status of EtcdV3
           properties:
             phase:
               description: The current phase of the terraform workflow
-              enum:
-              - Dependency
-              - Output
-              - Init
-              - Workspace
-              - Validate
-              - Plan
-              - Apply
               type: string
             state:
-              description: The current state of the terraform workflow
               enum:
               - Success
               - Failure

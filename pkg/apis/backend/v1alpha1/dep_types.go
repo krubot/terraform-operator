@@ -1,7 +1,7 @@
 package v1alpha1
 
 // +kubebuilder:subresource:status
-// DepSpec defines the dependency list of EtcdV3
+// DepSpec defines the dependency list
 type DepSpec struct {
 	// Dependency kind
 	// +kubebuilder:validation:Enum={"Backend","Module","Provider"}
@@ -9,6 +9,6 @@ type DepSpec struct {
 	// Dependency name
 	Name string `json:"name"`
 	// Dependency type
-	// +kubebuilder:validation:Enum={"EtcdV3","GoogleStorageBucket","Google"}
+	// +kubebuilder:validation:Enum={"EtcdV3","GCS","GoogleStorageBucket","GoogleStorageBucketIAMMember","Google"}
 	Type string `json:"type"`
 }

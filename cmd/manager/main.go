@@ -79,7 +79,16 @@ func main() {
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("Backend").WithName("EtcdV3"),
 		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	}).SetupWithEtcdV3(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Backend")
+		os.Exit(1)
+	}
+
+	if err = (&backendcontroller.ReconcileGCS{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("Backend").WithName("GCS"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithGCS(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Backend")
 		os.Exit(1)
 	}

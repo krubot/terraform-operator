@@ -26,8 +26,8 @@ import (
 // +kubebuilder:rbac:groups=batch.my.domain,resources=cronjobs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=batch.my.domain,resources=cronjobs/status,verbs=get;update;patch
 
-// ReconcileEtcdV3 reconciles a Backend object
-type ReconcileEtcdV3 struct {
+// ReconcileGCS reconciles a Backend object
+type ReconcileGCS struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
 	client.Client
@@ -35,7 +35,7 @@ type ReconcileEtcdV3 struct {
 	Scheme *runtime.Scheme
 }
 
-func (r *ReconcileEtcdV3) deletionReconcileEtcdV3(backend *backendv1alpha1.EtcdV3, finalizerInterfaces ...interface{}) error {
+func (r *ReconcileGCS) deletionReconcileGCS(backend *backendv1alpha1.GCS, finalizerInterfaces ...interface{}) error {
 	for _, finalizerInterface := range finalizerInterfaces {
 		for _, fin := range backend.GetFinalizers() {
 			instance_split_fin := strings.Split(fin, "_")
@@ -101,7 +101,7 @@ func (r *ReconcileEtcdV3) deletionReconcileEtcdV3(backend *backendv1alpha1.EtcdV
 	return nil
 }
 
-func (r *ReconcileEtcdV3) dependencyReconcileEtcdV3(backend *backendv1alpha1.EtcdV3, depInterfaces ...interface{}) (bool, error) {
+func (r *ReconcileGCS) dependencyReconcileGCS(backend *backendv1alpha1.GCS, depInterfaces ...interface{}) (bool, error) {
 	// Set the initial depency state
 	dependency_met := true
 	// Over the list of dependencies
@@ -194,7 +194,7 @@ func (r *ReconcileEtcdV3) dependencyReconcileEtcdV3(backend *backendv1alpha1.Etc
 	return dependency_met, nil
 }
 
-func (r *ReconcileEtcdV3) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *ReconcileGCS) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	GoogleStorageBucket := &modulev1alpha1.GoogleStorageBucket{}
 	GoogleStorageBucketIAMMember := &modulev1alpha1.GoogleStorageBucketIAMMember{}
 	Google := &providerv1alpha1.Google{}
@@ -209,45 +209,46 @@ func (r *ReconcileEtcdV3) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 	}
 
-	if err := r.Get(context.Background(), req.NamespacedName, EtcdV3); !errors.IsNotFound(err) {
-		if util.IsBeingDeleted(EtcdV3) {
-			if err := r.deletionReconcileEtcdV3(EtcdV3, GoogleStorageBucket, GoogleStorageBucketIAMMember, Google, EtcdV3, GCS); err != nil {
+	if err := r.Get(context.Background(), req.NamespacedName, GCS); !errors.IsNotFound(err) {
+		if util.IsBeingDeleted(GCS) {
+			if err := r.deletionReconcileGCS(GCS, GoogleStorageBucket, GoogleStorageBucketIAMMember, Google, EtcdV3, GCS); err != nil {
 				return reconcile.Result{}, err
 			}
 
-			if err := terraform.WriteToFile([]byte("{}"), EtcdV3.ObjectMeta.Namespace, "Backend_"+EtcdV3.Kind+"_"+EtcdV3.ObjectMeta.Name, os.Getenv("USER_WORKDIR")); err != nil {
+			if err := terraform.WriteToFile([]byte("{}"), GCS.ObjectMeta.Namespace, "Backend_"+GCS.Kind+"_"+GCS.ObjectMeta.Name, os.Getenv("USER_WORKDIR")); err != nil {
 				return reconcile.Result{}, err
 			}
 
-			util.RemoveFinalizer(EtcdV3, "Backend_"+EtcdV3.Kind+"_"+EtcdV3.ObjectMeta.Name)
+			util.RemoveFinalizer(GCS, "Backend_"+GCS.Kind+"_"+GCS.ObjectMeta.Name)
 
-			if err := r.Update(context.Background(), EtcdV3); err != nil {
+			if err := r.Update(context.Background(), GCS); err != nil {
 				return reconcile.Result{}, err
 			}
 
 			return reconcile.Result{}, nil
 		}
 
-		if dependency_met, err := r.dependencyReconcileEtcdV3(EtcdV3, GoogleStorageBucket, GoogleStorageBucketIAMMember, Google, EtcdV3, GCS); err == nil {
+		if dependency_met, err := r.dependencyReconcileGCS(GCS, GoogleStorageBucket, GoogleStorageBucketIAMMember, Google, EtcdV3, GCS); err == nil {
 			// Check if dependency is met else interate again
 			if !dependency_met {
 				// Set the data
-				EtcdV3.Status.State = "Failure"
-				EtcdV3.Status.Phase = "Dependency"
+				GCS.Status.State = "Failure"
+				GCS.Status.Phase = "Dependency"
 				// Update the CR with status success
-				if err := r.Status().Update(context.Background(), EtcdV3); err != nil {
+				if err := r.Status().Update(context.Background(), GCS); err != nil {
 					return reconcile.Result{}, err
 				}
 				// Dependency not met, don't error but finish reconcile until next change
 				return reconcile.Result{}, nil
 			}
 
-			if !reflect.DeepEqual("Dependency", EtcdV3.Status.Phase) {
+			if !reflect.DeepEqual("Dependency", GCS.Status.Phase) {
 				// Set the data
-				EtcdV3.Status.State = "Success"
-				EtcdV3.Status.Phase = "Dependency"
+				GCS.Status.State = "Success"
+				GCS.Status.Phase = "Dependency"
 				// Update the CR with status ready
-				if err := r.Status().Update(context.Background(), EtcdV3); err != nil {
+
+				if err := r.Status().Update(context.Background(), GCS); err != nil {
 					return reconcile.Result{}, err
 				}
 			}
@@ -256,31 +257,31 @@ func (r *ReconcileEtcdV3) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		// Add finalizer to the module resource
-		util.AddFinalizer(EtcdV3, "Backend_"+EtcdV3.Kind+"_"+EtcdV3.ObjectMeta.Name)
+		util.AddFinalizer(GCS, "Backend_"+GCS.Kind+"_"+GCS.ObjectMeta.Name)
 
 		// Update the CR with finalizer
-		if err := r.Update(context.Background(), EtcdV3); err != nil {
+		if err := r.Update(context.Background(), GCS); err != nil {
 			return reconcile.Result{}, err
 		}
 
-		b, err := terraform.RenderBackendToTerraform(EtcdV3.Spec, strings.ToLower(EtcdV3.Kind))
+		b, err := terraform.RenderBackendToTerraform(GCS.Spec, strings.ToLower(GCS.Kind))
 		if err != nil {
 			return reconcile.Result{}, err
 		}
 
-		err = terraform.WriteToFile(b, EtcdV3.ObjectMeta.Namespace, "Backend_"+EtcdV3.Kind+"_"+EtcdV3.ObjectMeta.Name, os.Getenv("USER_WORKDIR"))
+		err = terraform.WriteToFile(b, GCS.ObjectMeta.Namespace, "Backend_"+GCS.Kind+"_"+GCS.ObjectMeta.Name, os.Getenv("USER_WORKDIR"))
 		if err != nil {
 			return reconcile.Result{}, err
 		}
 
 		// Update CR with the AppStatus == Created
-		if !reflect.DeepEqual("Ready", EtcdV3.Status.State) {
+		if !reflect.DeepEqual("Ready", GCS.Status.State) {
 			// Set the data
-			EtcdV3.Status.State = "Success"
-			EtcdV3.Status.Phase = "Output"
+			GCS.Status.State = "Success"
+			GCS.Status.Phase = "Output"
 
 			// Update the CR with status success
-			if err = r.Status().Update(context.Background(), EtcdV3); err != nil {
+			if err = r.Status().Update(context.Background(), GCS); err != nil {
 				return reconcile.Result{}, err
 			}
 		}
@@ -289,10 +290,10 @@ func (r *ReconcileEtcdV3) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileEtcdV3) SetupWithEtcdV3(mgr ctrl.Manager) error {
+func (r *ReconcileGCS) SetupWithGCS(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&backendv1alpha1.EtcdV3{}).
-		Watches(&source.Kind{Type: &backendv1alpha1.EtcdV3{}}, &handler.EnqueueRequestForObject{}).
+		For(&backendv1alpha1.GCS{}).
+		Watches(&source.Kind{Type: &backendv1alpha1.GCS{}}, &handler.EnqueueRequestForObject{}).
 		WithEventFilter(util.ResourceGenerationChangedPredicate{}).
 		Complete(r)
 }

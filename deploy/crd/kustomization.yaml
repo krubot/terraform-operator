@@ -1,5 +1,6 @@
 resources:
   - backend.terraform.io_etcdv3s.yaml
+  - backend.terraform.io_gcs.yaml
   - provider.terraform.io_googles.yaml
   - module.terraform.io_googlestoragebuckets.yaml
   - module.terraform.io_googlestoragebucketiammembers.yaml

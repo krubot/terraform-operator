@@ -56,7 +56,9 @@ spec:
                 description: Dependency type
                 enum:
                 - EtcdV3
+                - GCS
                 - GoogleStorageBucket
+                - GoogleStorageBucketIAMMember
                 - Google
                 type: string
             required:

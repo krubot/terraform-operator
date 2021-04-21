@@ -39,7 +39,7 @@ spec:
           type: string
         dep:
           items:
-            description: DepSpec defines the dependency list of EtcdV3
+            description: DepSpec defines the dependency list
             properties:
               kind:
                 description: Dependency kind
@@ -55,7 +55,9 @@ spec:
                 description: Dependency type
                 enum:
                 - EtcdV3
+                - GCS
                 - GoogleStorageBucket
+                - GoogleStorageBucketIAMMember
                 - Google
                 type: string
             required:

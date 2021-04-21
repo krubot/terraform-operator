@@ -84,6 +84,17 @@ func (r *ReconcileGoogle) deletionReconcileGoogle(provider *providerv1alpha1.Goo
 						return errors.NewBadRequest("EtcdV3 dependency is not met for deletion")
 					}
 				}
+			case *backendv1alpha1.GCS:
+				if instance_split_fin[0] == "Backend" && instance_split_fin[1] == "GCS" {
+					if err := r.Get(context.Background(), types.NamespacedName{Name: instance_split_fin[2], Namespace: provider.ObjectMeta.Namespace}, finalizer); errors.IsNotFound(err) {
+						util.RemoveFinalizer(provider, fin)
+						if err := r.Update(context.Background(), provider); err != nil {
+							return err
+						}
+					} else {
+						return errors.NewBadRequest("GCS dependency is not met for deletion")
+					}
+				}
 			}
 		}
 	}
@@ -161,6 +172,22 @@ func (r *ReconcileGoogle) dependencyReconcileGoogle(provider *providerv1alpha1.G
 						dependency_met = false
 					}
 				}
+			case *backendv1alpha1.GCS:
+				if depProvider.Kind == "Backend" && depProvider.Type == "GCS" {
+					if err := r.Get(context.Background(), types.NamespacedName{Name: depProvider.Name, Namespace: provider.ObjectMeta.Namespace}, dep); err != nil {
+						return dependency_met, err
+					}
+					if dep.Status.State == "Success" {
+						// Add finalizer to the GoogleStorageBucket resource
+						util.AddFinalizer(dep, "Provider_"+provider.Kind+"_"+provider.ObjectMeta.Name)
+						// Update the CR with finalizer
+						if err := r.Update(context.Background(), dep); err != nil {
+							return dependency_met, err
+						}
+					} else {
+						dependency_met = false
+					}
+				}
 			}
 		}
 	}
@@ -172,6 +199,7 @@ func (r *ReconcileGoogle) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	GoogleStorageBucketIAMMember := &modulev1alpha1.GoogleStorageBucketIAMMember{}
 	Google := &providerv1alpha1.Google{}
 	EtcdV3 := &backendv1alpha1.EtcdV3{}
+	GCS := &backendv1alpha1.GCS{}
 
 	for {
 		e := "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
@@ -183,7 +211,7 @@ func (r *ReconcileGoogle) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if err := r.Get(context.Background(), req.NamespacedName, Google); !errors.IsNotFound(err) {
 		if util.IsBeingDeleted(Google) {
-			if err := r.deletionReconcileGoogle(Google, GoogleStorageBucket, GoogleStorageBucketIAMMember, Google, EtcdV3); err != nil {
+			if err := r.deletionReconcileGoogle(Google, GoogleStorageBucket, GoogleStorageBucketIAMMember, Google, EtcdV3, GCS); err != nil {
 				return reconcile.Result{}, err
 			}
 
@@ -200,7 +228,7 @@ func (r *ReconcileGoogle) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return reconcile.Result{}, nil
 		}
 
-		if dependency_met, err := r.dependencyReconcileGoogle(Google, GoogleStorageBucket, GoogleStorageBucketIAMMember, Google, EtcdV3); err == nil {
+		if dependency_met, err := r.dependencyReconcileGoogle(Google, GoogleStorageBucket, GoogleStorageBucketIAMMember, Google, EtcdV3, GCS); err == nil {
 			// Check if dependency is met else interate again
 			if !dependency_met {
 				// Set the data

@@ -11,4 +11,4 @@ dep:
     type: Google
   - kind: Backend
     name: state
-    type: EtcdV3
+    type: GCS
