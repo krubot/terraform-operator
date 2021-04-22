@@ -14,6 +14,15 @@ type GoogleStorageBucketSpec struct {
 	Name string `json:"name"`
 }
 
+// +kubebuilder:subresource:spec
+// OutputSpec defines the desired state of Output
+type OutputSpec struct {
+	// Bucket name (for single use)
+	Name string `json:"name"`
+	// Bucket URL (for single use)
+	URL string `json:"url"`
+}
+
 // +genclient
 // +genclient:Namespaced
 // +genclient:skipVerbs=updateStatus
@@ -31,6 +40,7 @@ type GoogleStorageBucket struct {
 
 	Spec   GoogleStorageBucketSpec `json:"spec,omitempty"`
 	Dep    []DepSpec               `json:"dep,omitempty"`
+	Output OutputSpec              `json:"output,omitempty"`
 	Status StatusSpec              `json:"status,omitempty"`
 }
 

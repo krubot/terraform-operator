@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"reflect"
 )
 
 type Terraform struct {
@@ -20,6 +21,32 @@ type Provider struct {
 
 type Module struct {
 	Module map[string]interface{} `json:"module"`
+}
+
+type Output struct {
+	Output map[string]interface{} `json:"output"`
+}
+
+func RenderOutputToTerraform(instance interface{}, moduleName string) ([][]byte, error) {
+	var byte_list [][]byte
+	v := reflect.TypeOf(instance)
+
+	for i := 0; i < v.NumField(); i++ {
+		t := Output{
+			Output: map[string]interface{}{
+				v.Field(i).Tag.Get("json"): map[string]string{
+					"value": "${module." + moduleName + "." + v.Field(i).Tag.Get("json") + "}",
+				},
+			},
+		}
+
+		b, err := json.MarshalIndent(t, "", "\t")
+		if err != nil {
+			return byte_list, err
+		}
+		byte_list = append(byte_list, b)
+	}
+	return byte_list, nil
 }
 
 // RenderProviderToTerraform takes an object, and attempts to construct the appropriate terraform json from it.
