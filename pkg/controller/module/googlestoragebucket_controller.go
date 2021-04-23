@@ -276,6 +276,28 @@ func (r *ReconcileGoogleStorageBucket) terraformReconcileGoogleStorageBucket(mod
 			return err
 		}
 	}
+
+	for i := 0; i < reflect.TypeOf(module.Output).NumField(); i++ {
+		output, err := terraform.TerraformOutput(module.ObjectMeta.Namespace, os.Getenv("USER_WORKDIR"), strings.ToLower(module.Kind)+"_"+strings.ToLower(module.ObjectMeta.Name)+"_"+reflect.TypeOf(module.Output).Field(i).Tag.Get("json"))
+		if err != nil {
+			return nil
+		}
+
+		val := reflect.ValueOf(&module).Elem().FieldByName("Output").Elem().FieldByName(reflect.TypeOf(module.Output).Field(i).Name).Elem()
+
+		if val.CanSet() {
+			val.SetString(output)
+		}
+	}
+
+	fmt.Println("Here is the output:")
+	fmt.Println(module)
+
+	// Update the CR with status ready
+	if err := r.Status().Update(context.Background(), module); err != nil {
+		return err
+	}
+
 	return nil
 }
 

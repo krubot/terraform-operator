@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/logutils"
 	"github.com/hashicorp/terraform-svchost/auth"
@@ -328,31 +329,20 @@ func TerraformApply(namespace string, path string) error {
 
 	backendInit.Init(services)
 
-	var tplReader bytes.Buffer
-	var tplStdOut bytes.Buffer
-	var tplStdErr bytes.Buffer
-
 	initCmd := &command.ApplyCommand{
 		Meta: command.Meta{
 			Color:               false,
 			RunningInAutomation: true,
 			PluginCacheDir:      config.PluginCacheDir,
 			Ui: &cli.BasicUi{
-				Reader:      &tplReader,
-				Writer:      &tplStdOut,
-				ErrorWriter: &tplStdErr,
+				Writer:      os.Stdout,
+				ErrorWriter: os.Stderr,
 			},
 		},
 	}
 
 	exitCode := initCmd.Run([]string{"-auto-approve"})
 	log.Print("TerraformApply exit code:", exitCode)
-	fmt.Println("heres stdread:")
-	fmt.Println(tplReader.String())
-	fmt.Println("heres stdout:")
-	fmt.Println(tplStdOut.String())
-	fmt.Println("heres stderr:")
-	fmt.Println(tplStdErr.String())
 	if err := os.Chdir(path); err != nil {
 		return errors.New("Couldn't change directory path")
 	}
@@ -360,4 +350,46 @@ func TerraformApply(namespace string, path string) error {
 		return errors.New("Terraform apply returned a none zero exit code")
 	}
 	return nil
+}
+
+func TerraformOutput(namespace string, path string, name string) (string, error) {
+	if err := os.Chdir(filepath.Join(path, namespace)); err != nil {
+		return "", errors.New("Couldn't change directory path")
+	}
+
+	log.SetOutput(logOutput())
+
+	config, _ := cliconfig.LoadConfig()
+	credsSrc, err := credentialsSource(config)
+	if err != nil {
+		log.Printf("[WARN] Cannot initialize remote host credentials manager: %s", err)
+	}
+
+	services := disco.NewWithCredentialsSource(credsSrc)
+	services.SetUserAgent(httpclient.TerraformUserAgent(version.String()))
+
+	backendInit.Init(services)
+
+	var tplStdOut bytes.Buffer
+
+	initCmd := &command.OutputCommand{
+		Meta: command.Meta{
+			Color:               false,
+			RunningInAutomation: true,
+			PluginCacheDir:      config.PluginCacheDir,
+			Ui: &cli.BasicUi{
+				Writer: &tplStdOut,
+			},
+		},
+	}
+
+	exitCode := initCmd.Run([]string{name})
+	log.Print("TerraformApply exit code:", exitCode)
+	if err := os.Chdir(path); err != nil {
+		return "", errors.New("Couldn't change directory path")
+	}
+	if exitCode != 0 {
+		return "", errors.New("Terraform apply returned a none zero exit code")
+	}
+	return strings.ReplaceAll(tplStdOut.String(), " ", ""), nil
 }

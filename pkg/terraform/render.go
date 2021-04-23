@@ -34,7 +34,7 @@ func RenderOutputToTerraform(instance interface{}, moduleName string) ([][]byte,
 	for i := 0; i < v.NumField(); i++ {
 		t := Output{
 			Output: map[string]interface{}{
-				v.Field(i).Tag.Get("json"): map[string]string{
+				moduleName + "_" + v.Field(i).Tag.Get("json"): map[string]string{
 					"value": "${module." + moduleName + "." + v.Field(i).Tag.Get("json") + "}",
 				},
 			},
