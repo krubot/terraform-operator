@@ -391,5 +391,5 @@ func TerraformOutput(namespace string, path string, name string) (string, error)
 	if exitCode != 0 {
 		return "", errors.New("Terraform apply returned a none zero exit code")
 	}
-	return strings.ReplaceAll(tplStdOut.String(), " ", ""), nil
+	return strings.Replace(tplStdOut.String(), "\n", "", -1), nil
 }

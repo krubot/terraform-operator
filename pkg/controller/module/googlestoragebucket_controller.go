@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -283,18 +282,16 @@ func (r *ReconcileGoogleStorageBucket) terraformReconcileGoogleStorageBucket(mod
 			return nil
 		}
 
-		val := reflect.ValueOf(&module).Elem().FieldByName("Output").Elem().FieldByName(reflect.TypeOf(module.Output).Field(i).Name).Elem()
+		t := reflect.ValueOf(&module.Output).Elem()
+		val := t.FieldByName(reflect.TypeOf(module.Output).Field(i).Name)
 
 		if val.CanSet() {
 			val.SetString(output)
 		}
 	}
 
-	fmt.Println("Here is the output:")
-	fmt.Println(module)
-
 	// Update the CR with status ready
-	if err := r.Status().Update(context.Background(), module); err != nil {
+	if err := r.Update(context.Background(), module); err != nil {
 		return err
 	}
 
@@ -389,8 +386,8 @@ func (r *ReconcileGoogleStorageBucket) Reconcile(req ctrl.Request) (ctrl.Result,
 			return reconcile.Result{}, err
 		}
 
-		for i, o := range d {
-			err = terraform.WriteToFile(o, GoogleStorageBucket.ObjectMeta.Namespace, "Output_"+GoogleStorageBucket.Kind+"_"+GoogleStorageBucket.ObjectMeta.Name+"_"+fmt.Sprint(i), os.Getenv("USER_WORKDIR"))
+		for _, o := range d {
+			err = terraform.AppendToFile(o, GoogleStorageBucket.ObjectMeta.Namespace, "Module_"+GoogleStorageBucket.Kind+"_"+GoogleStorageBucket.ObjectMeta.Name, os.Getenv("USER_WORKDIR"))
 			if err != nil {
 				return reconcile.Result{}, err
 			}
