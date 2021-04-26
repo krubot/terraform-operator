@@ -104,25 +104,6 @@ func WriteToFile(b []byte, namespace string, name string, path string) error {
 	return nil
 }
 
-func AppendToFile(b []byte, namespace string, name string, path string) error {
-	file, err := os.OpenFile(path+"/"+namespace+"/"+name+".tf.json", os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-
-	defer file.Close()
-
-	if _, err := file.WriteString(","); err != nil {
-		return err
-	}
-
-	if _, err := file.Write(b); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func RemoveFile(namespace string, name string, path string) error {
 	if err := os.Remove(path + "/" + namespace + "/" + name + ".tf.json"); err != nil {
 		return err

@@ -15,8 +15,8 @@ type GoogleStorageBucketSpec struct {
 }
 
 // +kubebuilder:subresource:spec
-// OutputSpec defines the desired state of Output
-type OutputSpec struct {
+// OutputGoogleStorageBucketSpec defines the desired state of Output
+type OutputGoogleStorageBucketSpec struct {
 	// Bucket name (for single use)
 	Name string `json:"name"`
 	// Bucket URL (for single use)
@@ -38,10 +38,10 @@ type GoogleStorageBucket struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   GoogleStorageBucketSpec `json:"spec,omitempty"`
-	Dep    []DepSpec               `json:"dep,omitempty"`
-	Output OutputSpec              `json:"output,omitempty"`
-	Status StatusSpec              `json:"status,omitempty"`
+	Spec   GoogleStorageBucketSpec       `json:"spec,omitempty"`
+	Dep    []DepSpec                     `json:"dep,omitempty"`
+	Output OutputGoogleStorageBucketSpec `json:"output,omitempty"`
+	Status StatusSpec                    `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

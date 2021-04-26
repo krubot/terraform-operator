@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -319,6 +320,18 @@ func (r *ReconcileGoogleStorageBucket) Reconcile(req ctrl.Request) (ctrl.Result,
 				return reconcile.Result{}, err
 			}
 
+			d, err := terraform.RenderOutputToTerraform(GoogleStorageBucket.Output, strings.ToLower(GoogleStorageBucket.Kind)+"_"+strings.ToLower(GoogleStorageBucket.ObjectMeta.Name))
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+
+			for i, _ := range d {
+				err = terraform.WriteToFile([]byte("{}"), GoogleStorageBucket.ObjectMeta.Namespace, "Output_"+GoogleStorageBucket.Kind+"_"+GoogleStorageBucket.ObjectMeta.Name+"_"+fmt.Sprint(i), os.Getenv("USER_WORKDIR"))
+				if err != nil {
+					return reconcile.Result{}, err
+				}
+			}
+
 			if err := terraform.WriteToFile([]byte("{}"), GoogleStorageBucket.ObjectMeta.Namespace, "Module_"+GoogleStorageBucket.Kind+"_"+GoogleStorageBucket.ObjectMeta.Name, os.Getenv("USER_WORKDIR")); err != nil {
 				return reconcile.Result{}, err
 			}
@@ -386,8 +399,8 @@ func (r *ReconcileGoogleStorageBucket) Reconcile(req ctrl.Request) (ctrl.Result,
 			return reconcile.Result{}, err
 		}
 
-		for _, o := range d {
-			err = terraform.AppendToFile(o, GoogleStorageBucket.ObjectMeta.Namespace, "Module_"+GoogleStorageBucket.Kind+"_"+GoogleStorageBucket.ObjectMeta.Name, os.Getenv("USER_WORKDIR"))
+		for i, o := range d {
+			err = terraform.WriteToFile(o, GoogleStorageBucket.ObjectMeta.Namespace, "Output_"+GoogleStorageBucket.Kind+"_"+GoogleStorageBucket.ObjectMeta.Name+"_"+fmt.Sprint(i), os.Getenv("USER_WORKDIR"))
 			if err != nil {
 				return reconcile.Result{}, err
 			}

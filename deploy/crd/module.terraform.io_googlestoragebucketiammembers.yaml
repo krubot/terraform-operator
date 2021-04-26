@@ -74,6 +74,16 @@ spec:
           type: string
         metadata:
           type: object
+        output:
+          description: OutputGoogleStorageBucketSpec defines the desired state of
+            Output
+          properties:
+            bindings_by_member:
+              description: List of bindings for entities unwinded by members.
+              type: string
+          required:
+          - bindings_by_member
+          type: object
         spec:
           description: GoogleStorageBucketIAMMemberSpec defines the desired state
             of GoogleStorageBucketIAMMember
