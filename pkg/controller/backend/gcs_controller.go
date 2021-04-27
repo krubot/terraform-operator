@@ -111,7 +111,7 @@ func (r *ReconcileGCS) dependencyReconcileGCS(backend *backendv1alpha1.GCS, depI
 			case *modulev1alpha1.GoogleStorageBucket:
 				if depBackend.Kind == "Module" && depBackend.Type == "GoogleStorageBucket" {
 					if err := r.Get(context.Background(), types.NamespacedName{Name: depBackend.Name, Namespace: backend.ObjectMeta.Namespace}, dep); err != nil {
-						return dependency_met, err
+						return false, nil
 					}
 					if dep.Status.State == "Success" {
 						// Add finalizer to the GoogleStorageBucket. resource
@@ -127,7 +127,7 @@ func (r *ReconcileGCS) dependencyReconcileGCS(backend *backendv1alpha1.GCS, depI
 			case *modulev1alpha1.GoogleStorageBucketIAMMember:
 				if depBackend.Kind == "Module" && depBackend.Type == "GoogleStorageBucketIAMMember" {
 					if err := r.Get(context.Background(), types.NamespacedName{Name: depBackend.Name, Namespace: backend.ObjectMeta.Namespace}, dep); err != nil {
-						return dependency_met, err
+						return false, nil
 					}
 					if dep.Status.State == "Success" {
 						// Add finalizer to the GoogleStorageBucket. resource
@@ -143,7 +143,7 @@ func (r *ReconcileGCS) dependencyReconcileGCS(backend *backendv1alpha1.GCS, depI
 			case *providerv1alpha1.Google:
 				if depBackend.Kind == "Provider" && depBackend.Type == "Google" {
 					if err := r.Get(context.Background(), types.NamespacedName{Name: depBackend.Name, Namespace: backend.ObjectMeta.Namespace}, dep); err != nil {
-						return dependency_met, err
+						return false, nil
 					}
 					if dep.Status.State == "Success" {
 						// Add finalizer to the GoogleStorageBucket resource
@@ -159,7 +159,7 @@ func (r *ReconcileGCS) dependencyReconcileGCS(backend *backendv1alpha1.GCS, depI
 			case *backendv1alpha1.EtcdV3:
 				if depBackend.Kind == "Backend" && depBackend.Type == "EtcdV3" {
 					if err := r.Get(context.Background(), types.NamespacedName{Name: depBackend.Name, Namespace: backend.ObjectMeta.Namespace}, dep); err != nil {
-						return dependency_met, err
+						return false, nil
 					}
 					if dep.Status.State == "Success" {
 						// Add finalizer to the GoogleStorageBucket resource
@@ -175,7 +175,7 @@ func (r *ReconcileGCS) dependencyReconcileGCS(backend *backendv1alpha1.GCS, depI
 			case *backendv1alpha1.GCS:
 				if depBackend.Kind == "Backend" && depBackend.Type == "GCS" {
 					if err := r.Get(context.Background(), types.NamespacedName{Name: depBackend.Name, Namespace: backend.ObjectMeta.Namespace}, dep); err != nil {
-						return dependency_met, err
+						return false, nil
 					}
 					if dep.Status.State == "Success" {
 						// Add finalizer to the GoogleStorageBucket resource
@@ -239,7 +239,7 @@ func (r *ReconcileGCS) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					return reconcile.Result{}, err
 				}
 				// Dependency not met, don't error but finish reconcile until next change
-				return reconcile.Result{}, nil
+				return reconcile.Result{}, errors.NewBadRequest("GCS dependencies have not been met")
 			}
 
 			if !reflect.DeepEqual("Dependency", GCS.Status.Phase) {
