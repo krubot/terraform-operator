@@ -18,10 +18,7 @@ type GoogleStorageBucketIAMMemberSpec struct {
 
 // +kubebuilder:subresource:spec
 // OutputGoogleStorageBucketSpec defines the desired state of Output
-type OutputGoogleStorageBucketIAMMemberSpec struct {
-	// List of bindings for entities unwinded by members.
-	BindingsByMember string `json:"bindings_by_member"`
-}
+type OutputGoogleStorageBucketIAMMemberSpec struct{}
 
 // +genclient
 // +genclient:Namespaced
