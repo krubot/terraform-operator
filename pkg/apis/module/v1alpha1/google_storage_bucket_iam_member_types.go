@@ -16,6 +16,10 @@ type GoogleStorageBucketIAMMemberSpec struct {
 	Entities []string `json:"entities"`
 }
 
+// +kubebuilder:subresource:spec
+// OutputGoogleStorageBucketSpec defines the desired state of Output
+type OutputGoogleStorageBucketIAMMemberSpec struct{}
+
 // +genclient
 // +genclient:Namespaced
 // +genclient:skipVerbs=updateStatus
@@ -31,9 +35,10 @@ type GoogleStorageBucketIAMMember struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   GoogleStorageBucketIAMMemberSpec `json:"spec,omitempty"`
-	Dep    []DepSpec                        `json:"dep,omitempty"`
-	Status StatusSpec                       `json:"status,omitempty"`
+	Spec   GoogleStorageBucketIAMMemberSpec       `json:"spec,omitempty"`
+	Dep    []DepSpec                              `json:"dep,omitempty"`
+	Output OutputGoogleStorageBucketIAMMemberSpec `json:"output,omitempty"`
+	Status StatusSpec                             `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -74,6 +74,20 @@ spec:
           type: string
         metadata:
           type: object
+        output:
+          description: OutputGoogleStorageBucketSpec defines the desired state of
+            Output
+          properties:
+            name:
+              description: Bucket name (for single use)
+              type: string
+            url:
+              description: Bucket URL (for single use)
+              type: string
+          required:
+          - name
+          - url
+          type: object
         spec:
           description: GoogleStorageBucketSpec defines the desired state of GoogleStorageBucket
           properties:

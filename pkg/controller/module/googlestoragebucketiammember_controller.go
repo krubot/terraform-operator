@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -111,7 +112,7 @@ func (r *ReconcileGoogleStorageBucketIAMMember) dependencyReconcileGoogleStorage
 			case *modulev1alpha1.GoogleStorageBucket:
 				if depModule.Kind == "Module" && depModule.Type == "GoogleStorageBucket" {
 					if err := r.Get(context.Background(), types.NamespacedName{Name: depModule.Name, Namespace: module.ObjectMeta.Namespace}, dep); err != nil {
-						return dependency_met, err
+						return false, nil
 					}
 					if dep.Status.State == "Success" {
 						util.AddFinalizer(dep, "Module_"+module.Kind+"_"+module.ObjectMeta.Name)
@@ -126,7 +127,7 @@ func (r *ReconcileGoogleStorageBucketIAMMember) dependencyReconcileGoogleStorage
 			case *modulev1alpha1.GoogleStorageBucketIAMMember:
 				if depModule.Kind == "Module" && depModule.Type == "GoogleStorageBucketIAMMember" {
 					if err := r.Get(context.Background(), types.NamespacedName{Name: depModule.Name, Namespace: module.ObjectMeta.Namespace}, dep); err != nil {
-						return dependency_met, err
+						return false, nil
 					}
 					if dep.Status.State == "Success" {
 						util.AddFinalizer(dep, "Module_"+module.Kind+"_"+module.ObjectMeta.Name)
@@ -141,7 +142,7 @@ func (r *ReconcileGoogleStorageBucketIAMMember) dependencyReconcileGoogleStorage
 			case *providerv1alpha1.Google:
 				if depModule.Kind == "Provider" && depModule.Type == "Google" {
 					if err := r.Get(context.Background(), types.NamespacedName{Name: depModule.Name, Namespace: module.ObjectMeta.Namespace}, dep); err != nil {
-						return dependency_met, err
+						return false, nil
 					}
 					if dep.Status.State == "Success" {
 						util.AddFinalizer(dep, "Module_"+module.Kind+"_"+module.ObjectMeta.Name)
@@ -156,7 +157,7 @@ func (r *ReconcileGoogleStorageBucketIAMMember) dependencyReconcileGoogleStorage
 			case *backendv1alpha1.EtcdV3:
 				if depModule.Kind == "Backend" && depModule.Type == "EtcdV3" {
 					if err := r.Get(context.Background(), types.NamespacedName{Name: depModule.Name, Namespace: module.ObjectMeta.Namespace}, dep); err != nil {
-						return dependency_met, err
+						return false, nil
 					}
 					if dep.Status.State == "Success" {
 						util.AddFinalizer(dep, "Module_"+module.Kind+"_"+module.ObjectMeta.Name)
@@ -171,7 +172,7 @@ func (r *ReconcileGoogleStorageBucketIAMMember) dependencyReconcileGoogleStorage
 			case *backendv1alpha1.GCS:
 				if depModule.Kind == "Backend" && depModule.Type == "GCS" {
 					if err := r.Get(context.Background(), types.NamespacedName{Name: depModule.Name, Namespace: module.ObjectMeta.Namespace}, dep); err != nil {
-						return dependency_met, err
+						return false, nil
 					}
 					if dep.Status.State == "Success" {
 						util.AddFinalizer(dep, "Module_"+module.Kind+"_"+module.ObjectMeta.Name)
@@ -275,6 +276,26 @@ func (r *ReconcileGoogleStorageBucketIAMMember) terraformReconcileGoogleStorageB
 			return err
 		}
 	}
+
+	for i := 0; i < reflect.TypeOf(module.Output).NumField(); i++ {
+		output, err := terraform.TerraformOutput(module.ObjectMeta.Namespace, os.Getenv("USER_WORKDIR"), strings.ToLower(module.Kind)+"_"+strings.ToLower(module.ObjectMeta.Name)+"_"+reflect.TypeOf(module.Output).Field(i).Tag.Get("json"))
+		if err != nil {
+			return nil
+		}
+
+		t := reflect.ValueOf(&module.Output).Elem()
+		val := t.FieldByName(reflect.TypeOf(module.Output).Field(i).Name)
+
+		if val.CanSet() {
+			val.SetString(output)
+		}
+	}
+
+	// Update the CR with status ready
+	if err := r.Update(context.Background(), module); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -297,6 +318,18 @@ func (r *ReconcileGoogleStorageBucketIAMMember) Reconcile(req ctrl.Request) (ctr
 		if util.IsBeingDeleted(GoogleStorageBucketIAMMember) {
 			if err := r.deletionReconcileGoogleStorageBucketIAMMember(GoogleStorageBucketIAMMember, GoogleStorageBucket, GoogleStorageBucketIAMMember, Google, EtcdV3, GCS); err != nil {
 				return reconcile.Result{}, err
+			}
+
+			d, err := terraform.RenderOutputToTerraform(GoogleStorageBucketIAMMember.Output, strings.ToLower(GoogleStorageBucketIAMMember.Kind)+"_"+strings.ToLower(GoogleStorageBucketIAMMember.ObjectMeta.Name))
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+
+			for i, _ := range d {
+				err = terraform.WriteToFile([]byte("{}"), GoogleStorageBucketIAMMember.ObjectMeta.Namespace, "Output_"+GoogleStorageBucketIAMMember.Kind+"_"+GoogleStorageBucketIAMMember.ObjectMeta.Name+"_"+fmt.Sprint(i), os.Getenv("USER_WORKDIR"))
+				if err != nil {
+					return reconcile.Result{}, err
+				}
 			}
 
 			if err := terraform.WriteToFile([]byte("{}"), GoogleStorageBucketIAMMember.ObjectMeta.Namespace, "Module_"+GoogleStorageBucketIAMMember.Kind+"_"+GoogleStorageBucketIAMMember.ObjectMeta.Name, os.Getenv("USER_WORKDIR")); err != nil {
@@ -327,7 +360,7 @@ func (r *ReconcileGoogleStorageBucketIAMMember) Reconcile(req ctrl.Request) (ctr
 					return reconcile.Result{}, err
 				}
 				// Dependency not met, don't error but finish reconcile until next change
-				return reconcile.Result{}, nil
+				return reconcile.Result{}, errors.NewBadRequest("GoogleStorageBucketIAMMember dependencies have not been met")
 			}
 
 			if !reflect.DeepEqual("Dependency", GoogleStorageBucketIAMMember.Status.Phase) {
@@ -359,6 +392,18 @@ func (r *ReconcileGoogleStorageBucketIAMMember) Reconcile(req ctrl.Request) (ctr
 		err = terraform.WriteToFile(c, GoogleStorageBucketIAMMember.ObjectMeta.Namespace, "Module_"+GoogleStorageBucketIAMMember.Kind+"_"+GoogleStorageBucketIAMMember.ObjectMeta.Name, os.Getenv("USER_WORKDIR"))
 		if err != nil {
 			return reconcile.Result{}, err
+		}
+
+		d, err := terraform.RenderOutputToTerraform(GoogleStorageBucketIAMMember.Output, strings.ToLower(GoogleStorageBucketIAMMember.Kind)+"_"+strings.ToLower(GoogleStorageBucketIAMMember.ObjectMeta.Name))
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		for i, o := range d {
+			err = terraform.WriteToFile(o, GoogleStorageBucketIAMMember.ObjectMeta.Namespace, "Output_"+GoogleStorageBucketIAMMember.Kind+"_"+GoogleStorageBucketIAMMember.ObjectMeta.Name+"_"+fmt.Sprint(i), os.Getenv("USER_WORKDIR"))
+			if err != nil {
+				return reconcile.Result{}, err
+			}
 		}
 
 		if !reflect.DeepEqual("Success", GoogleStorageBucketIAMMember.Status.State) {

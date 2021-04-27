@@ -74,6 +74,10 @@ spec:
           type: string
         metadata:
           type: object
+        output:
+          description: OutputGoogleStorageBucketSpec defines the desired state of
+            Output
+          type: object
         spec:
           description: GoogleStorageBucketIAMMemberSpec defines the desired state
             of GoogleStorageBucketIAMMember
